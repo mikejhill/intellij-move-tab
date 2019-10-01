@@ -6,7 +6,7 @@
 
 	<description>
 		<![CDATA[
-			Allows you to adjust tab the IDE order using keyboard shortcuts, similar to tab management in some popular web browsers. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
+			Allows you to adjust the IDE tab order using keyboard shortcuts, similar to tab management in some popular web browsers. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
         ]]>
 	</description>
 
