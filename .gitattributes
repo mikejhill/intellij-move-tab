@@ -1,0 +1,11 @@
+################################################################################
+# Repository-level EOL configuration, akin to core.autocrlf but on a repository-
+# wide level rather than on per-user.
+#
+# See for reference:
+#   https://www.kernel.org/pub/software/scm/git/docs/gitattributes.html#_end_of_line_conversion
+#   https://coderwall.com/p/buf0rq/use-gitattributes-to-normalize-line-endings
+################################################################################
+* text=auto
+*.sh eol=lf
+gradlew eol=lf
