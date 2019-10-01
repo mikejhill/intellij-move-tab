@@ -1,0 +1,38 @@
+<idea-plugin>
+	<id>com.mikejhill.intellij.movetab</id>
+	<name>MoveTab</name>
+	<version>1.0.0</version>
+	<vendor email="mike@mikejhill.com">Mike Hill</vendor>
+
+	<description>
+		<![CDATA[
+			Allows you to adjust tab the IDE order using keyboard shortcuts, similar to tab management in some popular web browsers. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
+        ]]>
+	</description>
+
+	<change-notes>
+		<![CDATA[
+			<ul>
+				<li>Initial release. This is an adaptation of the previous plugin of a similar name by momomo.com: <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">A move tab left and right using the keyboard plugin - by momomo.com</a></li>
+			</ul>
+		]]>
+	</change-notes>
+
+	<!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+	<idea-version since-build="192.6817" />
+
+	<extensions defaultExtensionNs="com.intellij">
+		<!-- Add your extensions here -->
+	</extensions>
+
+	<actions>
+		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
+			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_UP" />
+		</action>
+
+		<action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
+			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_DOWN" />
+		</action>
+	</actions>
+
+</idea-plugin>
