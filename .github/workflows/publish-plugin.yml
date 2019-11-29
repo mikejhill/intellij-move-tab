@@ -24,6 +24,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build
+        env:
+          CI: true
         run: |
           ./gradlew --no-daemon verifyPlugin
       - name: Publish Artifact
@@ -33,6 +35,6 @@ jobs:
           path: build/libs
       - name: Publish Plugin
         env:
-          ORG_GRADLE_PROJECT_intellijPublishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
+          publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
         run: |
           ./gradlew --no-daemon publishPlugin
