@@ -1,0 +1,26 @@
+name: Verify Plugin
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Publish Master
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1.0.0
+      - name: Setup Java
+        uses: actions/setup-java@v1.0.0
+        with:
+          version: 11.x
+      - name: Use Gradle Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Build
+        run: |
+          ./gradlew --no-daemon verifyPlugin
