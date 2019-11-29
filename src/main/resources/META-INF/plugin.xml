@@ -18,12 +18,9 @@
 		]]>
 	</change-notes>
 
-	<!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-	<idea-version since-build="192.6817" />
-
-	<extensions defaultExtensionNs="com.intellij">
-		<!-- Add your extensions here -->
-	</extensions>
+	<!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
+	<idea-version since-build="192.*" />
+	<depends>com.intellij.modules.platform</depends>
 
 	<actions>
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
@@ -34,5 +31,7 @@
 			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_DOWN" />
 		</action>
 	</actions>
+
+	<extensions defaultExtensionNs="com.intellij" />
 
 </idea-plugin>

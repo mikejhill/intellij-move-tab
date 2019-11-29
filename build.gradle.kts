@@ -13,7 +13,7 @@ repositories {
 plugins {
     base
     `kotlin-dsl`
-    id("org.jetbrains.intellij") version "0.4.10"
+    id("org.jetbrains.intellij") version "0.4.14"
 }
 
 group = "com.mikejhill"
