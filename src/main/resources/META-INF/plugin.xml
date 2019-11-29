@@ -1,7 +1,5 @@
 <idea-plugin>
-	<id>com.mikejhill.intellij.movetab</id>
 	<name>MoveTab</name>
-	<version>1.1.0</version>
 	<vendor email="mike@mikejhill.com">Mike Hill</vendor>
 
 	<description>
@@ -19,17 +17,7 @@
 		]]>
 	</description>
 
-	<change-notes>
-		<![CDATA[
-			<ul>
-				<li>1.1: Added support for IntelliJ 2019.3.</li>
-				<li>1.0: Initial release. This is an adaptation of the previous plugin of a similar name by momomo.com: <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">A move tab left and right using the keyboard plugin - by momomo.com</a></li>
-			</ul>
-		]]>
-	</change-notes>
-
 	<!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
-	<idea-version since-build="192.*" />
 	<depends>com.intellij.modules.platform</depends>
 
 	<actions>
