@@ -20,7 +20,7 @@ group = "com.mikejhill"
 version = "1.0.0"
 
 intellij {
-    version = "2019.2.3"
+    version = "2019.3"
     type = "IU"
 }
 

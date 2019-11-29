@@ -7,13 +7,11 @@ import com.intellij.openapi.fileEditor.impl.EditorWindow
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.tabs.TabInfo
-import com.intellij.ui.tabs.newImpl.JBEditorTabs
+import com.intellij.ui.tabs.impl.JBEditorTabs
 import java.awt.Component
 import java.util.function.Consumer
 
 abstract class MoveTab : AnAction(), DumbAware {
-
-    enum class Direction { LEFT, RIGHT }
 
     protected fun perform(event: AnActionEvent, direction: Direction) {
         val manager: FileEditorManagerEx = event.project?.let { FileEditorManagerEx.getInstanceEx(it) } ?: return
@@ -63,5 +61,7 @@ abstract class MoveTab : AnAction(), DumbAware {
             else -> targetIndex
         }
     }
+
+    enum class Direction { LEFT, RIGHT }
 }
 
