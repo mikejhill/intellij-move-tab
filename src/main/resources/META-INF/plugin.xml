@@ -1,19 +1,29 @@
 <idea-plugin>
 	<id>com.mikejhill.intellij.movetab</id>
 	<name>MoveTab</name>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<vendor email="mike@mikejhill.com">Mike Hill</vendor>
 
 	<description>
 		<![CDATA[
-			Allows you to adjust the IDE tab order using keyboard shortcuts, similar to tab management in some popular web browsers. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
-        ]]>
+			<p>
+				This plugin adds keyboard shortcuts for reordering IDE tabs. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
+			</p>
+			<p>
+				Usage (default keyboard shortcuts):
+				<ul>
+					<li>Shift+Ctrl+Page Up: Move the current tab to the left.</li>
+					<li>Shift+Ctrl+Page Down: Move the current tab to the right.</li>
+				</ul>
+			</p>
+		]]>
 	</description>
 
 	<change-notes>
 		<![CDATA[
 			<ul>
-				<li>Initial release. This is an adaptation of the previous plugin of a similar name by momomo.com: <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">A move tab left and right using the keyboard plugin - by momomo.com</a></li>
+				<li>1.1: Added support for IntelliJ 2019.3.</li>
+				<li>1.0: Initial release. This is an adaptation of the previous plugin of a similar name by momomo.com: <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">A move tab left and right using the keyboard plugin - by momomo.com</a></li>
 			</ul>
 		]]>
 	</change-notes>
@@ -26,7 +36,6 @@
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
 			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_UP" />
 		</action>
-
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
 			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_DOWN" />
 		</action>
