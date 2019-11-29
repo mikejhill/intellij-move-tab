@@ -1,11 +1,11 @@
-name: Verify Plugin
+name: Build and Verify Plugin
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Publish Master
+    name: Build and Verify Plugin
     timeout-minutes: 10
     steps:
       - name: Checkout
