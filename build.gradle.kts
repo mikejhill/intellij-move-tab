@@ -23,6 +23,7 @@ intellij {
     pluginName = "MoveTab"
     type = "IU"
     version = "2019.3"
+    downloadSources = false
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
