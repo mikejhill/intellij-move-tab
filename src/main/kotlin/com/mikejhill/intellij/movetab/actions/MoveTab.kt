@@ -16,7 +16,7 @@ abstract class MoveTab : AnAction(), DumbAware {
     protected fun perform(event: AnActionEvent, direction: Direction) {
         val manager: FileEditorManagerEx = event.project?.let { FileEditorManagerEx.getInstanceEx(it) } ?: return
         val window: EditorWindow = manager.currentWindow ?: return
-        val files: Array<VirtualFile> = window.files ?: arrayOf()
+        val files: Array<VirtualFile> = window.files
 
         // Guard-clause: Handle trivial cases
         if (!manager.hasOpenedFile() || files.size == 1) {
@@ -38,12 +38,12 @@ abstract class MoveTab : AnAction(), DumbAware {
 
         // Remove and replace all tabs
         tabComponent.removeAllTabs()
-        tabList.forEach(Consumer<TabInfo> { tabComponent.addTab(it) })
+        tabList.forEach(Consumer { tabComponent.addTab(it) })
         manager.openFile(files[existingTabIndex], true, true)
     }
 
     private fun getTabComponent(window: EditorWindow): JBEditorTabs? {
-        return window.selectedEditor.component?.let {
+        return window.selectedEditor?.component?.let {
             var cmp: Component? = it
             while (cmp != null && cmp !is JBEditorTabs) cmp = cmp.parent
             cmp

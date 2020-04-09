@@ -22,12 +22,12 @@ version = "1.1.0"
 intellij {
     pluginName = "MoveTab"
     type = "IU"
-    version = "2019.3"
+    version = "2020.1"
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId("com.mikejhill.intellij.movetab")
-    sinceBuild("193.5233")
+    sinceBuild("201.6668")
     changeNotes(file("$projectDir/docs/CHANGELOG.html").readText())
 }
 
