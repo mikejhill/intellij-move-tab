@@ -32,14 +32,16 @@ val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
 }
 
 val publishPlugin by tasks.existing(PublishTask::class) {
-    val publishToken: String? = project.extra["publishToken"]?.toString() ?: System.getenv("publishToken")
-    val publishUsername: String? = project.extra["publishUsername"]?.toString() ?: System.getenv("publishUsername")
-    val publishPassword: String? = project.extra["publishPassword"]?.toString() ?: System.getenv("publishPassword")
-    setToken(publishToken)
-    setUsername(publishUsername)
-    setPassword(publishPassword)
+    setToken(getPropertyValue("publishToken"))
+    setUsername(getPropertyValue("publishUsername"))
+    setPassword(getPropertyValue("publishPassword"))
 }
 
 tasks.withType<Wrapper> {
     distributionType = Wrapper.DistributionType.ALL
+}
+
+
+fun getPropertyValue(name: String): String? {
+    return if (project.extra.has(name)) project.extra[name]?.toString() else System.getenv(name)
 }
