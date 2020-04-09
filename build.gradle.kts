@@ -32,9 +32,9 @@ val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
 }
 
 val publishPlugin by tasks.existing(PublishTask::class) {
-    val publishToken: String? by project.extra
-    val publishUsername: String? by project.extra
-    val publishPassword: String? by project.extra
+    val publishToken: String? = project.extra["publishToken"]?.toString() ?: System.getenv("publishToken")
+    val publishUsername: String? = project.extra["publishUsername"]?.toString() ?: System.getenv("publishUsername")
+    val publishPassword: String? = project.extra["publishPassword"]?.toString() ?: System.getenv("publishPassword")
     setToken(publishToken)
     setUsername(publishUsername)
     setPassword(publishPassword)
