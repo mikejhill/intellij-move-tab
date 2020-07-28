@@ -3,7 +3,7 @@ import org.jetbrains.intellij.tasks.PublishTask
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath(kotlin("gradle-plugin", version = "1.3.61")) }
+    dependencies { classpath(kotlin("gradle-plugin", version = "1.3.72")) }
 }
 
 repositories {
@@ -12,8 +12,8 @@ repositories {
 
 plugins {
     base
-    kotlin("jvm") version "1.3.61"
-    id("org.jetbrains.intellij") version "0.4.14"
+    kotlin("jvm") version "1.3.72"
+    id("org.jetbrains.intellij") version "0.4.21"
 }
 
 group = "com.mikejhill"
@@ -21,14 +21,14 @@ version = "1.2.0"
 
 intellij {
     pluginName = "MoveTab"
-    type = "IU"
-    version = "2020.1"
+    type = "IC"
+    version = "LATEST-EAP-SNAPSHOT"
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId("com.mikejhill.intellij.movetab")
     sinceBuild("201.6668")
-    changeNotes(file("$projectDir/docs/CHANGELOG.html").readText())
+    changeNotes("<![CDATA[" + file("$projectDir/docs/CHANGELOG.html").readText() + "]]>")
 }
 
 val publishPlugin by tasks.existing(PublishTask::class) {
