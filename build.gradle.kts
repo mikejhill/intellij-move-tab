@@ -28,7 +28,14 @@ intellij {
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId("com.mikejhill.intellij.movetab")
-    sinceBuild("201.6668")
+    sinceBuild("203")
+    /*
+     * Support in perpetuity so that the "since-build" attribute does not need to be updated for every major IDE
+     * release. Due to the simple nature of this plugin, it is rare for IDE updates to break functionality. To reduce
+     * maintenance costs, we unset this property so that the "until-build" attribute is excluded, preventing users from
+     * having to wait for a plugin update each time that a new IDE major version is released.
+     */
+    untilBuild(null)
     changeNotes("<![CDATA[" + file("$projectDir/docs/CHANGELOG.html").readText() + "]]>")
 }
 
