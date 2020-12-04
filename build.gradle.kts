@@ -1,5 +1,6 @@
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeTask
 
 buildscript {
     repositories { mavenCentral() }
@@ -21,7 +22,7 @@ version = "1.3.0"
 
 intellij {
     pluginName = "MoveTab"
-    type = "IC"
+    type = "IU"
     version = "LATEST-EAP-SNAPSHOT"
 }
 
@@ -41,6 +42,9 @@ tasks.withType<Wrapper> {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+tasks.withType<RunIdeTask> {
+    jvmArgs("-Xms4g", "-Xmx4g", "-Dcom.sun.management.jmxremote")
+}
 
 fun getPropertyValue(name: String): String? {
     return if (project.extra.has(name)) project.extra[name]?.toString() else System.getenv(name)
