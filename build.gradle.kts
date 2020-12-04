@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.mikejhill"
-version = "1.4.0"
+version = "1.4.1"
 
 intellij {
     pluginName = "MoveTab"
