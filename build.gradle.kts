@@ -4,7 +4,7 @@ import org.jetbrains.intellij.tasks.RunIdeTask
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath(kotlin("gradle-plugin", version = "1.3.72")) }
+    dependencies { classpath(kotlin("gradle-plugin", version = "1.4.20")) }
 }
 
 repositories {
@@ -13,8 +13,8 @@ repositories {
 
 plugins {
     base
-    kotlin("jvm") version "1.3.72"
-    id("org.jetbrains.intellij") version "0.4.21"
+    kotlin("jvm") version "1.4.20"
+    id("org.jetbrains.intellij") version "0.6.5"
 }
 
 group = "com.mikejhill"
