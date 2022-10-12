@@ -43,7 +43,7 @@ abstract class MoveTab : AnAction(), DumbAware {
     }
 
     private fun getTabComponent(window: EditorWindow): JBEditorTabs? {
-        return window.selectedEditor?.component?.let {
+        return window.selectedComposite?.component?.let {
             var cmp: Component? = it
             while (cmp != null && cmp !is JBEditorTabs) cmp = cmp.parent
             cmp
@@ -64,4 +64,3 @@ abstract class MoveTab : AnAction(), DumbAware {
 
     enum class Direction { LEFT, RIGHT }
 }
-
