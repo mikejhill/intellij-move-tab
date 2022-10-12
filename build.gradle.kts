@@ -36,7 +36,7 @@ val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
      * having to wait for a plugin update each time that a new IDE major version is released.
      */
     untilBuild(null)
-    changeNotes("<![CDATA[" + file("$projectDir/docs/CHANGELOG.html").readText() + "]]>")
+    changeNotes.set(project.provider { project.file("docs/CHANGELOG.html").readText() })
 }
 
 val publishPlugin by tasks.existing(PublishTask::class) {
