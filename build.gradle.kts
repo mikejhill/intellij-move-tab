@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.mikejhill"
-version = "1.4.1"
+version = "2.0.0"
 
 java {
     toolchain {
@@ -29,13 +29,13 @@ java {
 intellij {
     pluginName.set("MoveTab")
     type.set("IU")
-    version.set("LATEST-EAP-SNAPSHOT")
+    version.set("223.6160.11-EAP-SNAPSHOT")
     updateSinceUntilBuild.set(false) // Configure sinceBuild/untilBuild compatibility manually
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId.set("com.mikejhill.intellij.movetab")
-    sinceBuild.set("203")
+    sinceBuild.set("223")
     changeNotes.set(project.provider { project.file("docs/CHANGELOG.html").readText() })
 }
 
