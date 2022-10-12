@@ -20,6 +20,12 @@ plugins {
 group = "com.mikejhill"
 version = "1.4.1"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 intellij {
     pluginName.set("MoveTab")
     type.set("IU")
