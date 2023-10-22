@@ -12,9 +12,8 @@ repositories {
 }
 
 plugins {
-    base
-    kotlin("jvm") version "1.7.20"
-    id("org.jetbrains.intellij") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
+    id("org.jetbrains.intellij") version "1.16.0"
 }
 
 group = "com.mikejhill"
