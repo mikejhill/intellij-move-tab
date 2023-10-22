@@ -2,11 +2,6 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 
-buildscript {
-    repositories { mavenCentral() }
-    dependencies { classpath(kotlin("gradle-plugin", version = "1.7.20")) }
-}
-
 repositories {
     mavenCentral()
 }
@@ -28,13 +23,13 @@ java {
 intellij {
     pluginName.set("MoveTab")
     type.set("IU")
-    version.set("223.6160.11-EAP-SNAPSHOT")
+    version.set("232.10072.27")
     updateSinceUntilBuild.set(false) // Configure sinceBuild/untilBuild compatibility manually
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId.set("com.mikejhill.intellij.movetab")
-    sinceBuild.set("223")
+    sinceBuild.set("232")
     changeNotes.set(project.provider { project.file("docs/CHANGELOG.html").readText() })
 }
 
