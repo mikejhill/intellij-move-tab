@@ -25,8 +25,13 @@ abstract class MoveTab : AnAction(), DumbAware {
 
         // Get editor tab component
         val tabComponent: JBEditorTabs = getTabComponent(window) ?: return
-        val tabList = tabComponent.tabs
+        val tabList = tabComponent.tabs.toMutableList()
         val currentTab = tabComponent.selectedInfo
+
+        // Guard-clause: Stop if no tab selected
+        if (currentTab == null) {
+            return
+        }
 
         // Get existing and replacement tab indices
         val existingTabIndex = tabList.indexOf(currentTab)
