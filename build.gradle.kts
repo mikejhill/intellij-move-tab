@@ -22,7 +22,7 @@ java {
 
 intellij {
     pluginName.set("MoveTab")
-    type.set("IU")
+    type.set("IC")
     version.set("232.10072.27")
     updateSinceUntilBuild.set(false) // Configure sinceBuild/untilBuild compatibility manually
 }
