@@ -45,6 +45,15 @@ tasks.withType<RunIdeTask> {
     jvmArgs("-Xms4g", "-Xmx4g", "-Dcom.sun.management.jmxremote")
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 fun getPropertyValue(name: String): String? {
     return if (project.extra.has(name)) project.extra[name]?.toString() else System.getenv(name)
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("io.mockk:mockk:1.13.8")
 }
