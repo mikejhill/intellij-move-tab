@@ -37,10 +37,6 @@ val publishPlugin by tasks.existing(PublishPluginTask::class) {
     token.set(getPropertyValue("publishToken"))
 }
 
-tasks.withType<Wrapper> {
-    distributionType = Wrapper.DistributionType.ALL
-}
-
 tasks.withType<RunIdeTask> {
     jvmArgs("-Xms4g", "-Xmx4g", "-Dcom.sun.management.jmxremote")
 }
