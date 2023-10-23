@@ -12,13 +12,13 @@ import java.awt.Component
 
 abstract class MoveTab : AnAction(), DumbAware {
 
-    protected fun perform(event: AnActionEvent, direction: Direction) {
+    protected fun perform(event: AnActionEvent, direction: MoveTabDirection) {
         val manager: FileEditorManagerEx = event.project?.let { FileEditorManagerEx.getInstanceEx(it) } ?: return
         val window: EditorWindow = manager.currentWindow ?: return
 
         // Get editor tab component
         val tabComponent: JBEditorTabs = getTabComponent(window) ?: return
-        val tabList = tabComponent.tabs
+        val origTabList = tabComponent.tabs
         val currentTab = tabComponent.selectedInfo
 
         // Guard-clause: Stop if no tab selected
@@ -27,22 +27,14 @@ abstract class MoveTab : AnAction(), DumbAware {
         }
 
         // Get tab movement instructions
-        val origTabIndex = tabList.indexOf(currentTab)
-        val tabMoveCommand = getTabMoveCommand(origTabIndex, direction, tabList)
+        val newTabList = getNewTabList(origTabList, currentTab, direction)
 
         // To avoid effects from the current tab being removed and recreated, move other tabs instead
-        if (tabMoveCommand.wrap) {
-            // Move all other tabs
-            val newTabList = tabList.toMutableList()
-            newTabList.removeAt(tabMoveCommand.origIndex)
-            newTabList.add(tabMoveCommand.newIndex, currentTab)
-            newTabList.forEach { if (it != currentTab) tabComponent.removeTab(it) }
-            newTabList.forEachIndexed { index, tabInfo -> tabComponent.addTab(tabInfo, index) }
-        } else {
-            // Move single sibling tab
-            val siblingTab = tabComponent.getTabAt(tabMoveCommand.newIndex)
-            tabComponent.removeTab(siblingTab)
-            tabComponent.addTab(siblingTab, tabMoveCommand.origIndex)
+        val movedTabList =
+            origTabList.filterIndexed { index, tabInfo -> tabInfo != newTabList[index] && tabInfo != currentTab }
+        movedTabList.forEach { tabComponent.removeTab(it) }
+        newTabList.forEachIndexed { index, tabInfo ->
+            if (tabInfo in movedTabList) tabComponent.addTab(tabInfo, index)
         }
     }
 
@@ -54,18 +46,30 @@ abstract class MoveTab : AnAction(), DumbAware {
         } as JBEditorTabs?
     }
 
-    private fun getTabMoveCommand(origIndex: Int, direction: Direction, tabList: List<TabInfo>): TabMoveCommand {
+
+    private fun getNewTabList(
+        origTabList: List<TabInfo>,
+        currentTab: TabInfo,
+        direction: MoveTabDirection
+    ): List<TabInfo> {
+        // Get new tab index
+        val origIndex = origTabList.indexOf(currentTab)
         val targetIndex = origIndex + when (direction) {
-            Direction.LEFT -> -1
-            Direction.RIGHT -> 1
+            MoveTabDirection.LEFT -> -1
+            MoveTabDirection.RIGHT -> 1
         }
-        return when {
-            targetIndex < 0 -> TabMoveCommand(origIndex, tabList.size - 1, true, direction)
-            targetIndex >= tabList.size -> TabMoveCommand(origIndex, 0, true, direction)
-            else -> TabMoveCommand(origIndex, targetIndex, false, direction)
+        val newIndex = when {
+            targetIndex < 0 -> origTabList.size - 1
+            targetIndex >= origTabList.size -> 0
+            else -> targetIndex
         }
+
+        // Get mutated list
+        return origTabList.toMutableList()
+            .apply { removeAt(origIndex) }
+            .apply { add(newIndex, currentTab) }
+            .toList()
     }
 
-    data class TabMoveCommand(val origIndex: Int, val newIndex: Int, val wrap: Boolean, val direction: Direction)
-    enum class Direction { LEFT, RIGHT }
+    enum class MoveTabDirection { LEFT, RIGHT }
 }
