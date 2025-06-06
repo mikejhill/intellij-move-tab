@@ -37,7 +37,7 @@ jobs:
                 run: |
                     curl -L -o semrel https://registry.go-semantic-release.xyz/downloads/linux/amd64/semantic-release
                     chmod +x semrel
-                    ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes 2>&1 | tee semrel.log
+                    ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes --no-ci 2>&1 | tee semrel.log
                     if [ -f .version-unreleased ]; then
                         version=$(cat .version-unreleased)
                         rm .version-unreleased
