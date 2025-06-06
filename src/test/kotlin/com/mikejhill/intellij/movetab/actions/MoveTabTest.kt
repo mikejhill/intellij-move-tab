@@ -31,7 +31,6 @@ class MoveTabTest : BasePlatformTestCase() {
     var currentTab: TabInfo? = null
 
     // Mocks
-    lateinit var mockitoOpenMocks: AutoCloseable
     @MockK lateinit var projectMock: Project
     @MockK lateinit var fileEditorManagerMock: FileEditorManagerEx
     @MockK lateinit var editorWindowMock: EditorWindow
