@@ -1,17 +1,26 @@
-# intellij-move-tab
-A simple IntelliJ plugin for moving tabs.
+# IntelliJ Move Tab
 
 ![Build and Verify Plugin](https://github.com/mikejhill/intellij-move-tab/workflows/Build%20and%20Verify%20Plugin/badge.svg)
 ![Publish Plugin](https://github.com/mikejhill/intellij-move-tab/workflows/Publish%20Plugin/badge.svg)
 
+Quickly reorder your editor tabs with simple keyboard shortcuts.
+
+<img src="src/main/resources/META-INF/plugin-icon.svg" alt="Plugin icon" width="80"/>
+
 Plugin page: https://plugins.jetbrains.com/plugin/13087-movetab
 
-This is based off of the original plugin by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>. No source for the original plugin could be found, so all work has been reproduced and improved to work with the latest JetBrains IDEs.
-
 ### Usage
+* **Ctrl+Shift+Page Up** – move the current tab to the left
+* **Ctrl+Shift+Page Down** – move the current tab to the right
 
-* Ctrl+Shift+Page Up: Move the current tab one item to the left.
-* Ctrl+Shift+Page Down: Move the current tab one item to the right.
+```mermaid
+flowchart LR
+    A[Key Press] --> B{Direction}
+    B --> |Page Up| C[Move Left]
+    B --> |Page Down| D[Move Right]
+```
+
+Based on the original plugin by [momomo.com](https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com).
 
 ### Build
 
