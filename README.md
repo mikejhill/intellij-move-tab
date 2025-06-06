@@ -25,3 +25,11 @@ Based on the original plugin by [momomo.com](https://plugins.jetbrains.com/plugi
 ### Build
 
 Run `./gradlew :move-tab-plugin:verifyPlugin` to build and test the plugin.
+
+### Releasing
+
+All branches display the predicted next version during CI builds using
+`go-semantic-release`. To cut a new release tag, trigger the **Create Release Tag**
+workflow from the `master` branch on GitHub. The workflow computes the next
+`vX.Y.Z` tag and pushes it along with generated release notes. Tagging the
+repository automatically starts the existing publish process.

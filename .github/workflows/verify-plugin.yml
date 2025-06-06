@@ -31,3 +31,14 @@ jobs:
                     CI: true
                 run: |
                     ./gradlew --no-daemon :move-tab-plugin:verifyPlugin
+            -   name: Predict Next Version
+                id: semrel
+                uses: go-semantic-release/action@v1
+                with:
+                    github-token: ${{ secrets.GITHUB_TOKEN }}
+                    dry: true
+            -   name: Show Predicted Version
+                run: |
+                    echo "### Predicted Release Version" >> "$GITHUB_STEP_SUMMARY"
+                    echo "" >> "$GITHUB_STEP_SUMMARY"
+                    echo "Next release version if created from this commit: **${{ steps.semrel.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
