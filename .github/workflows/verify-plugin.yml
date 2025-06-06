@@ -22,7 +22,7 @@ jobs:
             -   name: Setup Java
                 uses: actions/setup-java@v4.7.1
                 with:
-                    java-version: 17.x
+                    java-version: 21.x
                     distribution: temurin
             -   name: Setup Gradle
                 uses: gradle/actions/setup-gradle@v4
