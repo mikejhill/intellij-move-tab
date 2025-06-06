@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.impl.EditorWindow
 import com.intellij.openapi.project.DumbAware
 import com.intellij.ui.tabs.TabInfo
 import com.intellij.ui.tabs.impl.JBEditorTabs
+import com.mikejhill.intellij.movetab.settings.MoveTabSettings
 import java.awt.Component
 
 
@@ -59,8 +60,8 @@ abstract class MoveTab : AnAction(), DumbAware {
             MoveTabDirection.RIGHT -> 1
         }
         val newIndex = when {
-            targetIndex < 0 -> origTabList.size - 1
-            targetIndex >= origTabList.size -> 0
+            targetIndex < 0 -> if (MoveTabSettings.wrapAround) origTabList.size - 1 else origIndex
+            targetIndex >= origTabList.size -> if (MoveTabSettings.wrapAround) 0 else origIndex
             else -> targetIndex
         }
 
