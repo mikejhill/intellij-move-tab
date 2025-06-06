@@ -38,4 +38,7 @@ jobs:
                     github-token: ${{ secrets.GITHUB_TOKEN }}
                     dry: true
             -   name: Show Predicted Version
-                run: echo "Predicted release version: ${{ steps.semrel.outputs.version }}"
+                run: |
+                    echo "### Predicted Release Version" >> "$GITHUB_STEP_SUMMARY"
+                    echo "" >> "$GITHUB_STEP_SUMMARY"
+                    echo "The next release version will likely be **${{ steps.semrel.outputs.version }}**." >> "$GITHUB_STEP_SUMMARY"
