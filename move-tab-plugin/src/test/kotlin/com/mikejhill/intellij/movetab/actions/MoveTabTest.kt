@@ -213,6 +213,126 @@ class MoveTabTest : BasePlatformTestCase() {
         validateTabList(tabList, 5, 1, 2, 3, 4)
     }
 
+    @Test
+    fun `test_move_to_start_with_0_tabs`() {
+        prepareTabList(0, null)
+        validateTabList(tabList)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList)
+    }
+
+    @Test
+    fun `test_move_to_start_with_1_tab`() {
+        prepareTabList(1, 0)
+        validateTabList(tabList, 1)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1)
+    }
+
+    @Test
+    fun `test_move_to_start_with_2_tabs`() {
+        prepareTabList(2, 0)
+        validateTabList(tabList, 1, 2)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2)
+    }
+
+    @Test
+    fun `test_move_to_start_with_5_tabs`() {
+        prepareTabList(5, 0)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+    }
+
+    @Test
+    fun `test_move_to_start_with_5_tabs_no_selection`() {
+        prepareTabList(5, null)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+    }
+
+    @Test
+    fun `test_move_to_start_with_5_tabs_select_tab_5`() {
+        prepareTabList(5, 4)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 5, 1, 2, 3, 4)
+        MoveTabToStart().actionPerformed(actionEventMock)
+        validateTabList(tabList, 5, 1, 2, 3, 4)
+    }
+
+    @Test
+    fun `test_move_to_end_with_0_tabs`() {
+        prepareTabList(0, null)
+        validateTabList(tabList)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList)
+    }
+
+    @Test
+    fun `test_move_to_end_with_1_tab`() {
+        prepareTabList(1, 0)
+        validateTabList(tabList, 1)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1)
+    }
+
+    @Test
+    fun `test_move_to_end_with_2_tabs`() {
+        prepareTabList(2, 0)
+        validateTabList(tabList, 1, 2)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 2, 1)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 2, 1)
+    }
+
+    @Test
+    fun `test_move_to_end_with_5_tabs`() {
+        prepareTabList(5, 0)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 2, 3, 4, 5, 1)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 2, 3, 4, 5, 1)
+    }
+
+    @Test
+    fun `test_move_to_end_with_5_tabs_no_selection`() {
+        prepareTabList(5, null)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+    }
+
+    @Test
+    fun `test_move_to_end_with_5_tabs_select_tab_5`() {
+        prepareTabList(5, 4)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+        MoveTabToEnd().actionPerformed(actionEventMock)
+        validateTabList(tabList, 1, 2, 3, 4, 5)
+    }
+
     private fun prepareTabList(count: Int, selectedIndex: Int?) {
         tabList = (1..count).map { tabNum ->
             val tabName = "${tabNum}"
