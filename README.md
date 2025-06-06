@@ -12,3 +12,7 @@ This is based off of the original plugin by <a href="https://plugins.jetbrains.c
 
 * Ctrl+Shift+Page Up: Move the current tab one item to the left.
 * Ctrl+Shift+Page Down: Move the current tab one item to the right.
+
+### Build
+
+Run `./gradlew :move-tab-plugin:verifyPlugin` to build and test the plugin.

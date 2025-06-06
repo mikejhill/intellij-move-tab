@@ -27,14 +27,14 @@ jobs:
                 env:
                     CI: true
                 run: |
-                    ./gradlew --no-daemon verifyPlugin
+                    ./gradlew --no-daemon :move-tab-plugin:verifyPlugin
             -   name: Publish Artifact
                 uses: actions/upload-artifact@v4.6.2
                 with:
                     name: intellij-move-tab
-                    path: build/libs
+                    path: move-tab-plugin/build/libs
             -   name: Publish Plugin
                 env:
                     publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
                 run: |
-                    ./gradlew --no-daemon publishPlugin
+                    ./gradlew --no-daemon :move-tab-plugin:publishPlugin

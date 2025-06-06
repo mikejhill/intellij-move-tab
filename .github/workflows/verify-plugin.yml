@@ -30,4 +30,4 @@ jobs:
                 env:
                     CI: true
                 run: |
-                    ./gradlew --no-daemon verifyPlugin
+                    ./gradlew --no-daemon :move-tab-plugin:verifyPlugin

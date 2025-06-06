@@ -13,6 +13,8 @@ plugins {
 
 rootProject.name = "intellij-move-tab"
 
+include("move-tab-plugin")
+
 gradleEnterprise {
     buildScan {
         capture.isTaskInputFiles = true
