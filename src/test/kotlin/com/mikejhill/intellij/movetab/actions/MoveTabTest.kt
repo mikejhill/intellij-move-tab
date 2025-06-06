@@ -1,7 +1,6 @@
 package com.mikejhill.intellij.movetab.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.fileEditor.impl.EditorComposite
 import com.intellij.openapi.fileEditor.impl.EditorWindow
@@ -12,6 +11,7 @@ import com.intellij.ui.tabs.TabInfo
 import com.intellij.ui.tabs.impl.JBEditorTabs
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions
@@ -47,12 +47,10 @@ class MoveTabTest : BasePlatformTestCase() {
 
     private fun prepareMocks() {
         // Prepare UI editor tab mocks
-        every {
-            (projectMock.getService(FileEditorManager::class.java) as FileEditorManagerEx)
-                .currentWindow
-                ?.selectedComposite
-                ?.component
-        } returns tabComponentMock
+        mockkObject(FileEditorManagerEx.Companion)
+        every { FileEditorManagerEx.getInstanceEx(projectMock) } returns fileEditorManagerMock
+        every { fileEditorManagerMock.currentWindow } returns editorWindowMock
+        every { editorWindowMock.selectedComposite?.component } returns tabComponentMock
         every { tabComponentMock.tabs } answers { tabList }
         every { tabComponentMock.selectedInfo } answers { currentTab }
         every { tabComponentMock.removeTab(any()) } answers { tabList.remove(args[0]); ActionCallback.DONE }
