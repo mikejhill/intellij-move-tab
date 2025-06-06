@@ -33,12 +33,26 @@ jobs:
                     ./gradlew --no-daemon :move-tab-plugin:verifyPlugin
             -   name: Predict Next Version
                 id: semrel
-                uses: go-semantic-release/action@v1
-                with:
-                    github-token: ${{ secrets.GITHUB_TOKEN }}
-                    dry: true
+                shell: bash
+                run: |
+                    curl -L -o semrel https://registry.go-semantic-release.xyz/downloads/linux/amd64/semantic-release
+                    chmod +x semrel
+                    ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes 2>&1 | tee semrel.log
+                    if [ -f .version-unreleased ]; then
+                        version=$(cat .version-unreleased)
+                        rm .version-unreleased
+                    else
+                        version=""
+                    fi
+                    previous=$(grep -m1 -oE 'found version: [^ ]+' semrel.log | awk '{print $3}')
+                    echo "version=$version" >> "$GITHUB_OUTPUT"
+                    echo "previous=$previous" >> "$GITHUB_OUTPUT"
             -   name: Show Predicted Version
                 run: |
                     echo "### Predicted Release Version" >> "$GITHUB_STEP_SUMMARY"
                     echo "" >> "$GITHUB_STEP_SUMMARY"
-                    echo "Next release version if created from this commit: **${{ steps.semrel.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
+                    version="${{ steps.semrel.outputs.version }}"
+                    if [ -z "$version" ]; then
+                        version="${{ steps.semrel.outputs.previous }} (insufficient changes for new version)"
+                    fi
+                    echo "Next release version if created from this commit: **$version**" >> "$GITHUB_STEP_SUMMARY"
