@@ -13,13 +13,6 @@ Plugin page: https://plugins.jetbrains.com/plugin/13087-movetab
 * **Ctrl+Shift+Page Up** – move the current tab to the left
 * **Ctrl+Shift+Page Down** – move the current tab to the right
 
-```mermaid
-flowchart LR
-    A[Key Press] --> B{Direction}
-    B --> |Page Up| C[Move Left]
-    B --> |Page Down| D[Move Right]
-```
-
 Based on the original plugin by [momomo.com](https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com).
 
 ### Build
