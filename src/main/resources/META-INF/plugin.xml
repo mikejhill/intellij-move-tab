@@ -12,8 +12,8 @@
 			<p>
 				Usage (default keyboard shortcuts):
 				<ul>
-					<li>Shift+Ctrl+Page Up: Move the current tab to the left.</li>
-					<li>Shift+Ctrl+Page Down: Move the current tab to the right.</li>
+					<li>Ctrl+Shift+Page Up: Move the current tab to the left.</li>
+					<li>Ctrl+Shift+Page Down: Move the current tab to the right.</li>
 				</ul>
 			</p>
 		]]>
@@ -24,10 +24,10 @@
 
 	<actions>
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
-			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_UP" />
+			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_UP" />
 		</action>
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
-			<keyboard-shortcut keymap="$default" first-keystroke="shift ctrl PAGE_DOWN" />
+			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN" />
 		</action>
 	</actions>
 
