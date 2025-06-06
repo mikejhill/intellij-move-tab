@@ -50,6 +50,6 @@ fun getPropertyValue(name: String): String? {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.0-M3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
     testImplementation("io.mockk:mockk:1.14.2")
 }
