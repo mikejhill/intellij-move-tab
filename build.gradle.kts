@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.mikejhill"
-version = "2.1.1"
+version = "2.2.0"
 
 java {
     toolchain {
@@ -27,13 +27,13 @@ kotlin {
 intellij {
     pluginName.set("MoveTab")
     type.set("IC")
-    version.set("232.10072.27")
+    version.set("251.26094.121")
     updateSinceUntilBuild.set(false) // Configure sinceBuild/untilBuild compatibility manually
 }
 
 val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
     pluginId.set("com.mikejhill.intellij.movetab")
-    sinceBuild.set("232")
+    sinceBuild.set("251")
     changeNotes.set(project.provider { project.file("docs/CHANGELOG.html").readText() })
 }
 
