@@ -1,18 +1,22 @@
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 plugins {
+    id("java")
     kotlin("jvm") version "2.2.0-RC2"
-    id("org.jetbrains.intellij") version "1.17.4"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
 group = "com.mikejhill"
 version = "2.2.0"
+
 
 java {
     toolchain {
@@ -24,17 +28,16 @@ kotlin {
     jvmToolchain(21)
 }
 
-intellij {
-    pluginName.set("MoveTab")
-    type.set("IC")
-    version.set("251.26094.121")
-    updateSinceUntilBuild.set(false) // Configure sinceBuild/untilBuild compatibility manually
-}
-
-val patchPluginXml by tasks.existing(PatchPluginXmlTask::class) {
-    pluginId.set("com.mikejhill.intellij.movetab")
-    sinceBuild.set("251")
-    changeNotes.set(project.provider { rootProject.file("docs/CHANGELOG.html").readText() })
+intellijPlatform {
+    dependencies {
+        create("IC", "251.26094.121")
+    }
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "251"
+        }
+        changeNotes = project.provider { rootProject.file("docs/CHANGELOG.html").readText() }
+    }
 }
 
 val publishPlugin by tasks.existing(PublishPluginTask::class) {
