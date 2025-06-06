@@ -41,4 +41,4 @@ jobs:
                 run: |
                     echo "### Predicted Release Version" >> "$GITHUB_STEP_SUMMARY"
                     echo "" >> "$GITHUB_STEP_SUMMARY"
-                    echo "The next release version will likely be **${{ steps.semrel.outputs.version }}**." >> "$GITHUB_STEP_SUMMARY"
+                    echo "Next release version if created from this commit: **${{ steps.semrel.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
