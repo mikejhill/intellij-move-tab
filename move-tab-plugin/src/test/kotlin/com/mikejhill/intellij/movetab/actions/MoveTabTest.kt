@@ -217,7 +217,7 @@ class MoveTabTest : BasePlatformTestCase() {
         tabList = (1..count).map { tabNum ->
             val tabName = "${tabNum}"
             val tabInfo = TabInfo(JLabel(tabName))
-            tabInfo.text = tabName
+            tabInfo.setText(tabName)
             return@map tabInfo
         }.toMutableList()
         currentTab = if (selectedIndex != null) tabList[selectedIndex] else null
