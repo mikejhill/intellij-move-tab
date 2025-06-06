@@ -5,7 +5,7 @@
 
 Quickly reorder your editor tabs with simple keyboard shortcuts.
 
-<img src="src/main/resources/META-INF/plugin-icon.svg" alt="Plugin icon" width="80"/>
+<img src="move-tab-plugin/src/main/resources/META-INF/plugin-icon.svg" alt="Plugin icon" width="80"/>
 
 Plugin page: https://plugins.jetbrains.com/plugin/13087-movetab
 
