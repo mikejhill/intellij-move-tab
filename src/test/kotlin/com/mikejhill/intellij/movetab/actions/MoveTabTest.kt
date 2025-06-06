@@ -82,8 +82,10 @@ class MoveTabTest : BasePlatformTestCase() {
         prepareTabList(2, 0)
         validateTabList(tabList, 1, 2)
         MoveTabLeft().actionPerformed(actionEventMock)
+        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 2, 1)
         MoveTabLeft().actionPerformed(actionEventMock)
+        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 1, 2)
     }
 
@@ -158,8 +160,10 @@ class MoveTabTest : BasePlatformTestCase() {
         prepareTabList(2, 0)
         validateTabList(tabList, 1, 2)
         MoveTabRight().actionPerformed(actionEventMock)
+        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 2, 1)
         MoveTabRight().actionPerformed(actionEventMock)
+        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 1, 2)
     }
 
