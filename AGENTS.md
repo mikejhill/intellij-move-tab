@@ -4,7 +4,7 @@
 * There are no mandatory programmatic checks for this repository.
 * Use common prefixes across all modules within multi-module projects. The prefix for this project is `move-tab`; modules should be named using this prefix (e.g. `move-tab-plugin`).
 * `AGENTS.md` should be continually updated when new or helpful standards or conventions are brought up during interactions.
-* In pull request workflows, run `go-semantic-release` with `--no-ci` so it can execute without failing the CI condition checks.
+* Follow `.editorconfig` conventions when adding or modifying files.
 
 ## Commit Messages
 
