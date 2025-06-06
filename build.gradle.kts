@@ -7,8 +7,8 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.9.10"
-    id("org.jetbrains.intellij") version "1.16.0"
+    kotlin("jvm") version "2.2.0-RC2"
+    id("org.jetbrains.intellij") version "1.17.4"
 }
 
 group = "com.mikejhill"
@@ -50,6 +50,6 @@ fun getPropertyValue(name: String): String? {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.0-M3")
+    testImplementation("io.mockk:mockk:1.14.2")
 }
