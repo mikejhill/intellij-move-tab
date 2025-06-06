@@ -56,4 +56,7 @@ fun getPropertyValue(name: String): String? {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
     testImplementation("io.mockk:mockk:1.14.2")
+    // Required for BasePlatformTestCase (see FAQ about JUnit5 tests referring to JUnit4
+    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4)
+    testImplementation("junit:junit:4.13.2")
 }
