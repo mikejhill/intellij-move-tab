@@ -9,21 +9,14 @@ import com.intellij.openapi.util.ActionCallback
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.ui.tabs.TabInfo
 import com.intellij.ui.tabs.impl.JBEditorTabs
-import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import java.awt.Component
 import javax.swing.JLabel
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(MockKExtension::class)
+@RunWith(JUnit4::class)
 class MoveTabTest : BasePlatformTestCase() {
 
     // Stateful test properties
@@ -31,20 +24,30 @@ class MoveTabTest : BasePlatformTestCase() {
     var currentTab: TabInfo? = null
 
     // Mocks
-    @MockK lateinit var projectMock: Project
-    @MockK lateinit var fileEditorManagerMock: FileEditorManagerEx
-    @MockK lateinit var editorWindowMock: EditorWindow
-    @MockK lateinit var editorCompositeMock: EditorComposite
-    @MockK lateinit var tabComponentMock: JBEditorTabs
-    @MockK lateinit var actionEventMock: AnActionEvent
+    @get:Rule
+    val mockkRule = MockKRule(this)
 
-    @BeforeAll
-    fun setup() {
-        MockKAnnotations.init(this)
-        prepareMocks()
-    }
+    @MockK
+    lateinit var projectMock: Project
 
-    private fun prepareMocks() {
+    @MockK
+    lateinit var fileEditorManagerMock: FileEditorManagerEx
+
+    @MockK
+    lateinit var editorWindowMock: EditorWindow
+
+    @MockK
+    lateinit var editorCompositeMock: EditorComposite
+
+    @MockK
+    lateinit var tabComponentMock: JBEditorTabs
+
+    @MockK
+    lateinit var actionEventMock: AnActionEvent
+
+    override fun setUp() {
+        super.setUp()
+
         // Prepare UI editor tab mocks
         mockkObject(FileEditorManagerEx.Companion)
         every { FileEditorManagerEx.getInstanceEx(projectMock) } returns fileEditorManagerMock
@@ -53,12 +56,17 @@ class MoveTabTest : BasePlatformTestCase() {
         every { tabComponentMock.tabs } answers { tabList }
         every { tabComponentMock.selectedInfo } answers { currentTab }
         every { tabComponentMock.removeTab(any()) } answers { tabList.remove(args[0]); ActionCallback.DONE }
-        every { tabComponentMock.addTab(any(), any()) } answers { tabList.add(args[1] as Int, args[0] as TabInfo); args[0] as TabInfo }
+        every { tabComponentMock.addTab(any(), any()) } answers {
+            tabList.add(
+                args[1] as Int,
+                args[0] as TabInfo
+            ); args[0] as TabInfo
+        }
         every { actionEventMock.project } returns projectMock
     }
 
     @Test
-    fun `test_move_left_with_0_tabs`() {
+    fun test_move_left_with_0_tabs() {
         prepareTabList(0, null)
         validateTabList(tabList)
         MoveTabLeft().actionPerformed(actionEventMock)
@@ -68,7 +76,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_left_with_1_tab`() {
+    fun test_move_left_with_1_tab() {
         prepareTabList(1, 0)
         validateTabList(tabList, 1)
         MoveTabLeft().actionPerformed(actionEventMock)
@@ -78,19 +86,19 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_left_with_2_tabs`() {
+    fun test_move_left_with_2_tabs() {
         prepareTabList(2, 0)
         validateTabList(tabList, 1, 2)
         MoveTabLeft().actionPerformed(actionEventMock)
-        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
+        assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 2, 1)
         MoveTabLeft().actionPerformed(actionEventMock)
-        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
+        assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 1, 2)
     }
 
     @Test
-    fun `test_move_left_with_5_tabs`() {
+    fun test_move_left_with_5_tabs() {
         prepareTabList(5, 0)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabLeft().actionPerformed(actionEventMock)
@@ -108,7 +116,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_left_with_5_tabs_no_selection`() {
+    fun test_move_left_with_5_tabs_no_selection() {
         prepareTabList(5, null)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabLeft().actionPerformed(actionEventMock)
@@ -118,7 +126,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_left_with_5_tabs_select_tab_5`() {
+    fun test_move_left_with_5_tabs_select_tab_5() {
         prepareTabList(5, 4)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabLeft().actionPerformed(actionEventMock)
@@ -136,7 +144,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_right_with_0_tabs`() {
+    fun test_move_right_with_0_tabs() {
         prepareTabList(0, null)
         validateTabList(tabList)
         MoveTabRight().actionPerformed(actionEventMock)
@@ -146,7 +154,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_right_with_1_tab`() {
+    fun test_move_right_with_1_tab() {
         prepareTabList(1, 0)
         validateTabList(tabList, 1)
         MoveTabRight().actionPerformed(actionEventMock)
@@ -156,19 +164,19 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_right_with_2_tabs`() {
+    fun test_move_right_with_2_tabs() {
         prepareTabList(2, 0)
         validateTabList(tabList, 1, 2)
         MoveTabRight().actionPerformed(actionEventMock)
-        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
+        assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 2, 1)
         MoveTabRight().actionPerformed(actionEventMock)
-        Assertions.assertEquals(currentTab, tabComponentMock.selectedInfo)
+        assertEquals(currentTab, tabComponentMock.selectedInfo)
         validateTabList(tabList, 1, 2)
     }
 
     @Test
-    fun `test_move_right_with_5_tabs`() {
+    fun test_move_right_with_5_tabs() {
         prepareTabList(5, 0)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabRight().actionPerformed(actionEventMock)
@@ -186,7 +194,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_right_with_5_tabs_no_selection`() {
+    fun test_move_right_with_5_tabs_no_selection() {
         prepareTabList(5, null)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabRight().actionPerformed(actionEventMock)
@@ -196,7 +204,7 @@ class MoveTabTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun `test_move_right_with_5_tabs_select_tab_5`() {
+    fun test_move_right_with_5_tabs_select_tab_5() {
         prepareTabList(5, 4)
         validateTabList(tabList, 1, 2, 3, 4, 5)
         MoveTabRight().actionPerformed(actionEventMock)
@@ -226,7 +234,7 @@ class MoveTabTest : BasePlatformTestCase() {
     private fun validateTabList(tabList: List<TabInfo>, vararg tabIds: Int) {
         val expectedTabIdList = tabIds.map { it.toString() }
         val actualTabIdList = tabList.map { it.text }
-        Assertions.assertIterableEquals(expectedTabIdList, actualTabIdList)
+        assertOrderedEquals(actualTabIdList, expectedTabIdList)
     }
 
     private fun getTabComponent(window: EditorWindow): JBEditorTabs? {

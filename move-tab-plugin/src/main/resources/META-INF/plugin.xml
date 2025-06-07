@@ -2,7 +2,6 @@
 	<name>MoveTab</name>
 	<id>com.mikejhill.intellij.movetab</id>
 	<vendor email="mike@mikejhill.com">Mike Hill</vendor>
-	<icon>plugin-icon.svg</icon>
 
 	<description>
 		<![CDATA[
