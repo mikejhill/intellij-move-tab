@@ -32,7 +32,7 @@ tasks.withType<Test> {
 dependencies {
     intellijPlatform {
         intellijIdeaCommunity("2025.1.2")
-        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.JUnit5)
     }
     testImplementation("io.mockk:mockk:1.14.2")
     // Required for BasePlatformTestCase (see FAQ about JUnit5 tests referring to JUnit4
