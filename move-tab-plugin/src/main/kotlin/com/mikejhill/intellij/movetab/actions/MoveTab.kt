@@ -52,24 +52,21 @@ abstract class MoveTab : AnAction(), DumbAware {
         currentTab: TabInfo,
         direction: MoveTabDirection
     ): List<TabInfo> {
-        // Get new tab index
         val origIndex = origTabList.indexOf(currentTab)
-        val targetIndex = origIndex + when (direction) {
-            MoveTabDirection.LEFT -> -1
-            MoveTabDirection.RIGHT -> 1
-        }
-        val newIndex = when {
-            targetIndex < 0 -> origTabList.size - 1
-            targetIndex >= origTabList.size -> 0
-            else -> targetIndex
+        val lastIndex = origTabList.lastIndex
+
+        val newIndex = when (direction) {
+            MoveTabDirection.LEFT -> if (origIndex == 0) lastIndex else origIndex - 1
+            MoveTabDirection.RIGHT -> if (origIndex == lastIndex) 0 else origIndex + 1
+            MoveTabDirection.START -> 0
+            MoveTabDirection.END -> lastIndex
         }
 
-        // Get mutated list
         return origTabList.toMutableList()
             .apply { removeAt(origIndex) }
             .apply { add(newIndex, currentTab) }
             .toList()
     }
 
-    enum class MoveTabDirection { LEFT, RIGHT }
+    enum class MoveTabDirection { LEFT, RIGHT, START, END }
 }

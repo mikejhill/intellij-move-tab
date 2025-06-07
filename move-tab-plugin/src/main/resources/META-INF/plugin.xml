@@ -10,14 +10,16 @@
 				This plugin adds keyboard shortcuts for reordering IDE tabs. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
 			</p>
 			<p>
-				Usage (default keyboard shortcuts):
-				<ul>
-					<li>Ctrl+Shift+Page Up: Move the current tab to the left.</li>
-					<li>Ctrl+Shift+Page Down: Move the current tab to the right.</li>
-				</ul>
-			</p>
-		]]>
-	</description>
+                                Usage (default keyboard shortcuts):
+                                <ul>
+                                        <li>Ctrl+Shift+Page Up: Move the current tab to the left.</li>
+                                        <li>Ctrl+Shift+Page Down: Move the current tab to the right.</li>
+                                        <li>Ctrl+Shift+Home: Move the current tab to the start.</li>
+                                        <li>Ctrl+Shift+End: Move the current tab to the end.</li>
+                                </ul>
+                        </p>
+                ]]>
+        </description>
 
 	<!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
 	<depends>com.intellij.modules.platform</depends>
@@ -26,10 +28,16 @@
 		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
 			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_UP" />
 		</action>
-		<action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
-			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN" />
-		</action>
-	</actions>
+                <action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
+                        <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN" />
+                </action>
+                <action id="com.mikejhill.intellij.movetab.actions.MoveTabToStart" class="com.mikejhill.intellij.movetab.actions.MoveTabToStart" text="Move Tab To Start">
+                        <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift HOME" />
+                </action>
+                <action id="com.mikejhill.intellij.movetab.actions.MoveTabToEnd" class="com.mikejhill.intellij.movetab.actions.MoveTabToEnd" text="Move Tab To End">
+                        <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift END" />
+                </action>
+        </actions>
 
 	<extensions defaultExtensionNs="com.intellij" />
 
