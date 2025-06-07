@@ -5,6 +5,7 @@
 * Use common prefixes across all modules within multi-module projects. The prefix for this project is `move-tab`; modules should be named using this prefix (e.g. `move-tab-plugin`).
 * `AGENTS.md` should be continually updated when new or helpful standards or conventions are brought up during interactions.
 * Follow `.editorconfig` conventions when adding or modifying files.
+* Code scanning with CodeQL requires Java 21. A CodeQL configuration file (`.github/codeql/codeql-config.yml`) sets this version, so keep it in sync with the build.
 
 ## Commit Messages
 

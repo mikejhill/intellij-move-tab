@@ -1,0 +1,6 @@
+name: "MoveTab CodeQL"
+# Ensure CodeQL uses Java 21 so Gradle plugins like the Foojay resolver work.
+build:
+  java:
+    version: "21"
+  command: ./gradlew --no-daemon :move-tab-plugin:assemble
