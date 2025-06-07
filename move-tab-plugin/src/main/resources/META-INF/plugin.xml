@@ -31,6 +31,11 @@
 		</action>
 	</actions>
 
-	<extensions defaultExtensionNs="com.intellij" />
+        <extensions defaultExtensionNs="com.intellij">
+                <applicationConfigurable
+                        id="com.mikejhill.intellij.movetab.settings"
+                        displayName="Move Tab"
+                        instance="com.mikejhill.intellij.movetab.settings.MoveTabConfigurable"/>
+        </extensions>
 
 </idea-plugin>
