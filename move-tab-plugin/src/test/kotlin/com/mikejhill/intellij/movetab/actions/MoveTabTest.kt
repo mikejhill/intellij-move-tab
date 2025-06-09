@@ -15,10 +15,10 @@ import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
 import com.intellij.openapi.project.impl.ProjectImpl
 import com.intellij.testFramework.HeavyPlatformTestCase
 import com.intellij.testFramework.registerOrReplaceServiceInstance
+import java.nio.charset.Charset
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.nio.charset.Charset
 
 @RunWith(JUnit4::class)
 class MoveTabTest : HeavyPlatformTestCase() {
