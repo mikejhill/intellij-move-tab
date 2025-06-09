@@ -1,10 +1,10 @@
 <idea-plugin>
-	<name>MoveTab</name>
-	<id>com.mikejhill.intellij.movetab</id>
-	<vendor email="mike@mikejhill.com">Mike Hill</vendor>
+    <name>MoveTab</name>
+    <id>com.mikejhill.intellij.movetab</id>
+    <vendor email="mike@mikejhill.com">Mike Hill</vendor>
 
-	<description>
-		<![CDATA[
+    <description>
+        <![CDATA[
 			<p>
 				This plugin adds keyboard shortcuts for reordering IDE tabs. This is based off of the similar, but now defunct, plugin of a similar name by <a href="https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com">momomo.com</a>.
 			</p>
@@ -16,20 +16,24 @@
 				</ul>
 			</p>
 		]]>
-	</description>
+    </description>
 
-	<!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
-	<depends>com.intellij.modules.platform</depends>
+    <!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
+    <depends>com.intellij.modules.platform</depends>
 
-	<actions>
-		<action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft" class="com.mikejhill.intellij.movetab.actions.MoveTabLeft" text="Move Tab Left">
-			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_UP" />
-		</action>
-		<action id="com.mikejhill.intellij.movetab.actions.MoveTabRight" class="com.mikejhill.intellij.movetab.actions.MoveTabRight" text="Move Tab Right">
-			<keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN" />
-		</action>
-	</actions>
+    <actions>
+        <action id="com.mikejhill.intellij.movetab.actions.MoveTabLeft"
+                class="com.mikejhill.intellij.movetab.actions.MoveTabLeft"
+                text="Move Tab Left">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_UP"/>
+        </action>
+        <action id="com.mikejhill.intellij.movetab.actions.MoveTabRight"
+                class="com.mikejhill.intellij.movetab.actions.MoveTabRight"
+                text="Move Tab Right">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN"/>
+        </action>
+    </actions>
 
-	<extensions defaultExtensionNs="com.intellij" />
+    <extensions defaultExtensionNs="com.intellij"/>
 
 </idea-plugin>
