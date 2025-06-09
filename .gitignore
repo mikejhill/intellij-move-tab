@@ -156,3 +156,4 @@ replay_pid*
 .idea/**/*.iml
 .idea/jarRepositories.xml
 .idea/.name
+.intellijPlatform/
