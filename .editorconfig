@@ -7,36 +7,39 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
+
+# IntelliJ
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
 ij_formatter_tags_enabled = true
-ij_visual_guides = 120,160
-ij_wrap_on_typing = true
-ij_smart_tabs = false
+ij_visual_guides = 180
+ij_wrap_on_typing = false
+ij_smart_tabs = true
 
-[*.md]
-trim_trailing_whitespace = false
+[*.bat]
+# Empty
 
 [*.{kt,kts}]
 ij_kotlin_continuation_indent_size = 8
-ij_kotlin_imports_layout = *,java.*,javax.*,kotlin.*,blank,com.*,blank
-ij_kotlin_insert_imports_in_paste = true
-ij_kotlin_space_after_type_colon = true
+ij_kotlin_imports_layout = *, java.*, javax.*, kotlin.*, blank, com.*, blank
 
 [*.java]
 ij_continuation_indent_size = 8
-ij_java_blank_lines_after_imports = 1
-ij_java_imports_layout = *,javax.*,java.*,blank,com.*,blank
+ij_java_imports_layout = *, javax.*, java.*, blank, com.*, blank
 
-[*.{xml,html,yaml,yml}]
-indent_size = 2
+[*.md]
+# Empty
 
 [*.sh]
-indent_size = 4
-
-[*.bat]
-indent_size = 4
+# Empty
 
 [*.properties]
-indent_size = 4
+# Empty
 
+[*.{xml,html,svg}]
+# Empty
+ij_xml_continuation_indent_size = 8
+ij_html_continuation_indent_size = 8
+
+[*.{yaml,yml}]
+indent_size = 2
