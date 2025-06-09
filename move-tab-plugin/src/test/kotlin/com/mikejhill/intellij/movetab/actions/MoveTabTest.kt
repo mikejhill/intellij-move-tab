@@ -1,12 +1,14 @@
 package com.mikejhill.intellij.movetab.actions
 
+import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.ActionUiKind
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx
 import com.intellij.openapi.actionSystem.ex.ActionUtil
-import com.intellij.openapi.editor.ex.util.EditorUtil
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
@@ -22,8 +24,8 @@ import java.nio.charset.Charset
 class MoveTabTest : HeavyPlatformTestCase() {
 
     companion object {
-        const val ACTION_MOVE_LEFT = "com.mikejhill.intellij.movetab.actions.MoveTabLeft"
-        const val ACTION_MOVE_RIGHT = "com.mikejhill.intellij.movetab.actions.MoveTabRight"
+        val ACTION_MOVE_LEFT = MoveTabLeft::class.qualifiedName!!
+        val ACTION_MOVE_RIGHT = MoveTabRight::class.qualifiedName!!
     }
 
     override fun setUp() {
@@ -32,7 +34,7 @@ class MoveTabTest : HeavyPlatformTestCase() {
         // Register file editor manager; default TestEditorManagerImpl does not implement window semantics
         @Suppress("UnstableApiUsage")
         val fileEditorManager = FileEditorManagerImpl(project, (project as ProjectImpl).activityScope)
-        this.project.registerOrReplaceServiceInstance(
+        project.registerOrReplaceServiceInstance(
             FileEditorManager::class.java,
             fileEditorManager,
             testRootDisposable
@@ -51,6 +53,12 @@ class MoveTabTest : HeavyPlatformTestCase() {
         }
     }
 
+    private fun closeFile(position: Int) {
+        val fileEditorManager = FileEditorManagerEx.getInstanceEx(project)
+        val file = fileEditorManager.currentWindow!!.fileList[position - 1]
+        fileEditorManager.closeFile(file)
+    }
+
     private fun selectFile(position: Int) {
         val fileEditorManager = FileEditorManagerEx.getInstanceEx(project)
         val file = fileEditorManager.currentWindow!!.fileList[position - 1]
@@ -59,16 +67,16 @@ class MoveTabTest : HeavyPlatformTestCase() {
 
     private fun getFileOrder(): IntArray {
         val fileEditorManager = FileEditorManagerEx.getInstanceEx(project)
-        return fileEditorManager.currentWindow!!.fileList.map { Regex("""\d+""").find(it.name)!!.value.toInt() }
+        val currentWindow =
+            fileEditorManager.currentWindow ?: return intArrayOf() // If no windows are open, assume empty
+        return currentWindow.fileList
+            .map { Regex("""\d+""").find(it.name)!!.value.toInt() }
             .toIntArray()
     }
 
     private fun invokeAction(actionName: String) {
-        val actionManager = ActionManagerEx.getInstanceEx()
-        val action = actionManager.getAction(actionName)
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val dataContext = EditorUtil.getEditorEx(fileEditorManager.selectedEditor)
-            .let { EditorUtil.getEditorDataContext(it!!) }
+        @Suppress("DEPRECATION")
+        val dataContext = ApplicationManager.getApplication()!!.service<DataManager>().dataContext
         val actionEvent = AnActionEvent(
             dataContext,
             Presentation(),
@@ -76,8 +84,9 @@ class MoveTabTest : HeavyPlatformTestCase() {
             ActionUiKind.NONE,
             null,
             0,
-            actionManager
+            ActionManagerEx.getInstanceEx()
         )
+        val action = ActionManagerEx.getInstanceEx().getAction(actionName)
         ActionUtil.invokeAction(action, actionEvent, null)
     }
 
@@ -87,190 +96,135 @@ class MoveTabTest : HeavyPlatformTestCase() {
 
 
     @Test
-    fun example_test() {
+    fun move_left_when_no_window() {
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+    @Test
+    fun move_left_when_empty() {
+        // Create window, but remove all editors
+        openFiles(1)
+        closeFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+    @Test
+    fun move_left_from_first() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 4, 5, 1))
+    }
+
+    @Test
+    fun move_left_from_middle() {
         openFiles(5)
         selectFile(3)
         invokeAction(ACTION_MOVE_LEFT)
         assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 2, 4, 5))
     }
 
-//    @Test
-//    fun test_move_left_with_0_tabs() {
-//        prepareTabList(0, null)
-//        validateTabList(tabList)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList)
-//    }
-//
-//    @Test
-//    fun test_move_left_with_1_tab() {
-//        prepareTabList(1, 0)
-//        validateTabList(tabList, 1)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1)
-//    }
-//
-//    @Test
-//    fun test_move_left_with_2_tabs() {
-//        prepareTabList(2, 0)
-//        validateTabList(tabList, 1, 2)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        assertEquals(currentTab, tabComponentMock.selectedInfo)
-//        validateTabList(tabList, 2, 1)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        assertEquals(currentTab, tabComponentMock.selectedInfo)
-//        validateTabList(tabList, 1, 2)
-//    }
-//
-//    @Test
-//    fun test_move_left_with_5_tabs() {
-//        prepareTabList(5, 0)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 4, 5, 1)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 4, 1, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 1, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 1, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 4, 5, 1)
-//    }
-//
-//    @Test
-//    fun test_move_left_with_5_tabs_no_selection() {
-//        prepareTabList(5, null)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//    }
-//
-//    @Test
-//    fun test_move_left_with_5_tabs_select_tab_5() {
-//        prepareTabList(5, 4)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 5, 4)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 5, 3, 4)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 5, 2, 3, 4)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 5, 1, 2, 3, 4)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabLeft().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 5, 4)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_0_tabs() {
-//        prepareTabList(0, null)
-//        validateTabList(tabList)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_1_tab() {
-//        prepareTabList(1, 0)
-//        validateTabList(tabList, 1)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_2_tabs() {
-//        prepareTabList(2, 0)
-//        validateTabList(tabList, 1, 2)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        assertEquals(currentTab, tabComponentMock.selectedInfo)
-//        validateTabList(tabList, 2, 1)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        assertEquals(currentTab, tabComponentMock.selectedInfo)
-//        validateTabList(tabList, 1, 2)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_5_tabs() {
-//        prepareTabList(5, 0)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 1, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 1, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 4, 1, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 3, 4, 5, 1)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 2, 1, 3, 4, 5)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_5_tabs_no_selection() {
-//        prepareTabList(5, null)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//    }
-//
-//    @Test
-//    fun test_move_right_with_5_tabs_select_tab_5() {
-//        prepareTabList(5, 4)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 5, 1, 2, 3, 4)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 5, 2, 3, 4)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 5, 3, 4)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 5, 4)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 1, 2, 3, 4, 5)
-//        MoveTabRight().actionPerformed(actionEventMock)
-//        validateTabList(tabList, 5, 1, 2, 3, 4)
-//    }
-//
-//    private fun prepareTabList(count: Int, selectedIndex: Int?) {
-//        tabList = (1..count).map { tabNum ->
-//            val tabName = "${tabNum}"
-//            val tabInfo = TabInfo(JLabel(tabName))
-//            tabInfo.setText(tabName)
-//            return@map tabInfo
-//        }.toMutableList()
-//        currentTab = if (selectedIndex != null) tabList[selectedIndex] else null
-//    }
-//
-//    private fun validateTabList(tabList: List<TabInfo>, vararg tabIds: Int) {
-//        val expectedTabIdList = tabIds.map { it.toString() }
-//        val actualTabIdList = tabList.map { it.text }
-//        assertOrderedEquals(actualTabIdList, expectedTabIdList)
-//    }
-//
-//    private fun getTabComponent(window: EditorWindow): JBEditorTabs? {
-//        return window.selectedComposite?.component?.let {
-//            var cmp: Component? = it
-//            while (cmp != null && cmp !is JBEditorTabs) cmp = cmp.parent
-//            cmp
-//        } as JBEditorTabs?
-//    }
+    @Test
+    fun move_left_from_last() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 5, 4))
+    }
+
+    @Test
+    fun move_left_cycle() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 5, 4))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 5, 3, 4))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 5, 2, 3, 4))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(5, 1, 2, 3, 4))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+    @Test
+    fun move_right_when_no_window() {
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+    @Test
+    fun move_right_when_empty() {
+        // Create window, but remove all editors
+        openFiles(1)
+        closeFile(1)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+
+    @Test
+    fun move_right_from_first() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 1, 3, 4, 5))
+    }
+
+    @Test
+    fun move_right_from_middle() {
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 3, 5))
+    }
+
+    @Test
+    fun move_right_from_last() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(5, 1, 2, 3, 4))
+    }
+
+    @Test
+    fun move_right_cycle() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 1, 3, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 1, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 4, 1, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 4, 5, 1))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+
+    @Test
+    fun move_left_and_right() {
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 2, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 2, 4, 5))
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(3, 1, 2, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 2, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+        invokeAction(ACTION_MOVE_RIGHT)
+        invokeAction(ACTION_MOVE_RIGHT) // Validate "checking" the order on intermediate moves does not impact (Schrödinger's cat)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 5, 3))
+    }
 }
