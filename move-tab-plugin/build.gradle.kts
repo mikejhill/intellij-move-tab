@@ -53,7 +53,7 @@ dependencies {
         intellijIdeaCommunity("2025.1.2")
         testFramework(TestFrameworkType.Platform)
     }
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.1.0")
     // Required for BasePlatformTestCase (see FAQ about JUnit5 tests referring to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4)
     testImplementation("junit:junit:4.13.2")
