@@ -45,6 +45,10 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnit()
+    // The root project holds plugin.xml (required by IJPGP 2.x multi-module structure).
+    // Add it to the test classpath so the IntelliJ test framework can discover and
+    // register actions declared there.
+    classpath += rootProject.files("src/main/resources")
 }
 
 dependencies {
