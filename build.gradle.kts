@@ -19,6 +19,13 @@ intellijPlatform {
     }
 }
 
+tasks {
+    // This plugin has no configurable settings, so searchable options are unnecessary.
+    buildSearchableOptions {
+        enabled = false
+    }
+}
+
 dependencies {
     intellijPlatform {
         intellijIdeaCommunity("2025.1.2")
