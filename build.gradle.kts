@@ -17,6 +17,11 @@ intellijPlatform {
     pluginConfiguration {
         changeNotes = project.provider { rootProject.file("docs/CHANGELOG.html").readText() }
     }
+    pluginVerification {
+        ides {
+            recommended()
+        }
+    }
 }
 
 tasks {
