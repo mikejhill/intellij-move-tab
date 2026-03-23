@@ -135,6 +135,38 @@ class MoveTabTest : HeavyPlatformTestCase() {
     }
 
     @Test
+    fun move_left_single_tab() {
+        openFiles(1)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1))
+    }
+
+    @Test
+    fun move_right_single_tab() {
+        openFiles(1)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1))
+    }
+
+    @Test
+    fun move_left_from_first_two_tabs() {
+        openFiles(2)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 1))
+    }
+
+    @Test
+    fun move_right_from_last_two_tabs() {
+        openFiles(2)
+        selectFile(2)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 1))
+    }
+
+    @Test
     fun move_left_from_first() {
         openFiles(5)
         selectFile(1)

@@ -13,6 +13,8 @@ jobs:
     name: Build, Verify, and Publish Plugin
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4.3.1
@@ -27,9 +29,9 @@ jobs:
         env:
           CI: true
         run: |
-          ./gradlew --no-daemon :move-tab-plugin:verifyPlugin
+          ./gradlew --no-daemon verifyPlugin
       - name: Publish Artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: intellij-move-tab
           path: move-tab-plugin/build/libs
@@ -37,4 +39,4 @@ jobs:
         env:
           publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
         run: |
-          ./gradlew --no-daemon :move-tab-plugin:publishPlugin
+          ./gradlew --no-daemon publishPlugin
