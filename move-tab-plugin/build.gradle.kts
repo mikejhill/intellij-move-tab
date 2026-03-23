@@ -22,12 +22,11 @@
  * THE SOFTWARE.
  */
 
-import org.gradle.internal.deprecation.DeprecatableConfiguration
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.3.20"
     id("org.jetbrains.intellij.platform.module")
 }
 
@@ -62,8 +61,10 @@ dependencies {
 tasks.register("resolveDependencies") {
     group = "custom"
     notCompatibleWithConfigurationCache("Dependency resolution must occur on each execution.")
-    val dependencies =
-        project.files(project.configurations.matching { it.isCanBeResolved && !(it is DeprecatableConfiguration && it.resolutionAlternatives.isNotEmpty()) })
-    inputs.files(dependencies)
-    doLast { println("Resolved all dependencies (${dependencies.files.size} files).") }
+    doLast {
+        val count = project.configurations
+            .filter { it.isCanBeResolved }
+            .sumOf { config -> runCatching { config.resolve().size }.getOrElse { 0 } }
+        println("Resolved all dependencies ($count files).")
+    }
 }
