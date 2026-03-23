@@ -43,6 +43,7 @@
     </description>
 
     <!-- See https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges -->
+    <idea-version since-build="251"/>
     <depends>com.intellij.modules.platform</depends>
 
     <actions>

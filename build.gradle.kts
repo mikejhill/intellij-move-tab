@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 
@@ -21,7 +22,9 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
+            // Verify against only the IDE version used to build. Using recommended() downloads
+            // multiple IDEs across the compatibility range, making CI significantly slower.
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2025.1.2")
         }
         // The plugin ID predates the JetBrains rule against 'intellij' in plugin IDs.
         // This mutes the check so existing marketplace listings are not broken.
