@@ -5,6 +5,8 @@ plugins {
     id("org.jetbrains.intellij.platform")
 }
 
+version = "2.2.0"
+
 val publishPlugin by tasks.existing(PublishPluginTask::class) {
     token.set(getPropertyValue("publishToken"))
 }
@@ -21,6 +23,9 @@ intellijPlatform {
         ides {
             recommended()
         }
+        // The plugin ID predates the JetBrains rule against 'intellij' in plugin IDs.
+        // This mutes the check so existing marketplace listings are not broken.
+        freeArgs = listOf("-mute", "TemplateWordInPluginId")
     }
 }
 
