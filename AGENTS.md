@@ -35,7 +35,7 @@ Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions 
 * `pluginIcon.svg` lives in `docs/` (alongside `CHANGELOG.html`) as a project-level asset.
 * A `processResources` block in the root `build.gradle.kts` copies it into `META-INF/` at build time — JetBrains requires it there in the final plugin JAR.
 
-
+## Dependency Notes
 
 * `org.gradle.internal.deprecation.DeprecatableConfiguration` was removed in Gradle 9. Do not use internal Gradle APIs; use only stable public Gradle APIs.
 * The `resolveDependencies` task in `move-tab-plugin/build.gradle.kts` resolves all configurations via `doLast` (it is intentionally incompatible with the configuration cache).

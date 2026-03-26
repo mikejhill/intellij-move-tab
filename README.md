@@ -7,9 +7,9 @@ Quickly reorder your editor tabs with simple keyboard shortcuts.
 
 <img src="docs/pluginIcon.svg" alt="Plugin icon" width="80"/>
 
-Plugin page: https://plugins.jetbrains.com/plugin/13087-movetab
+Plugin page: <https://plugins.jetbrains.com/plugin/13087-movetab>
 
-### Usage
+## Usage
 
 * **Ctrl+Shift+Page Up** – move the current tab to the left
 * **Ctrl+Shift+Page Down** – move the current tab to the right
