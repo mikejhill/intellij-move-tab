@@ -5,7 +5,7 @@
 
 Quickly reorder your editor tabs with simple keyboard shortcuts.
 
-<img src="move-tab-plugin/src/main/resources/META-INF/plugin-icon.svg" alt="Plugin icon" width="80"/>
+<img src="docs/pluginIcon.svg" alt="Plugin icon" width="80"/>
 
 Plugin page: https://plugins.jetbrains.com/plugin/13087-movetab
 
@@ -19,7 +19,7 @@ by [momomo.com](https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-ri
 
 ### Build
 
-Run `./gradlew :move-tab-plugin:verifyPlugin` to build and test the plugin.
+Run `./gradlew check verifyPlugin` to build, test, and verify the plugin.
 
 ### Releasing
 

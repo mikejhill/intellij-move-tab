@@ -53,9 +53,12 @@ tasks.withType<Test> {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2025.1.2")
+        intellijIdea("2025.3.4")
         testFramework(TestFrameworkType.Platform)
     }
+    // Force Kotlin stdlib to 2.2.21+: IntelliJ 2025.3 requires SequencesKt.sequenceOf(T) (added in 2.2.x)
+    // mockito-kotlin transitively brings in kotlin-reflect:2.1.20 → kotlin-stdlib:2.1.20 which lacks it.
+    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.1.0")
     // Required for BasePlatformTestCase (see FAQ about JUnit5 tests referring to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4)

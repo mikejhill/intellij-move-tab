@@ -24,7 +24,7 @@ intellijPlatform {
         ides {
             // Verify against only the IDE version used to build. Using recommended() downloads
             // multiple IDEs across the compatibility range, making CI significantly slower.
-            create(IntelliJPlatformType.IntellijIdeaCommunity, "2025.1.2")
+            create(IntelliJPlatformType.IntellijIdea, "2025.3.4")
         }
         // The plugin ID predates the JetBrains rule against 'intellij' in plugin IDs.
         // This mutes the check so existing marketplace listings are not broken.
@@ -40,11 +40,19 @@ tasks {
     prepareJarSearchableOptions {
         enabled = false
     }
+    // The plugin icon lives in docs/ alongside other project-level assets.
+    // Copy it into the plugin JAR's META-INF at build time.
+    processResources {
+        from(layout.projectDirectory.dir("docs")) {
+            into("META-INF")
+            include("pluginIcon.svg")
+        }
+    }
 }
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2025.1.2")
+        intellijIdea("2025.3.4")
         pluginModule(implementation(project(":move-tab-plugin")))
     }
 }
