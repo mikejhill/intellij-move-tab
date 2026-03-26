@@ -14,10 +14,28 @@
 * **IntelliJ Platform Gradle Plugin**: 2.13.1 (requires Gradle >= 9.0)
 * **Kotlin JVM**: 2.2.21 (must remain below 2.3.20 until CodeQL adds support for it)
 * **Java toolchain**: 21 (temurin)
-* **Target IDE**: IntelliJ IDEA Community 2025.1.2 (minimum supported: 2025.1 / build 251)
-* **Plugin verification**: runs against 2025.1.2 only (single explicit IDE, not `recommended()`)
+* **Target IDE**: IntelliJ IDEA 2025.3.4 (minimum supported: 2025.3 / build 253)
+* **Plugin verification**: runs against 2025.3.4 only (single explicit IDE, not `recommended()`)
 
-## Dependency Notes
+## IntelliJ 2025.3 / IC-IU Merger
+
+Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions were merged into a single distribution:
+
+* Use `intellijIdea("version")` — **not** `intellijIdeaCommunity()` or `intellijIdeaUltimate()`
+* Use `IntelliJPlatformType.IntellijIdea` — **not** `IntelliJPlatformType.IntellijIdeaCommunity`
+* The `ideaIC` Maven artifact no longer exists for 253+; use `idea` (`IU` product code)
+
+## Kotlin Stdlib and Test Classpath
+
+* `kotlin.stdlib.default.dependency = false` in `gradle.properties` prevents the Kotlin Gradle Plugin from auto-adding the stdlib (correct — IntelliJ provides it at runtime).
+* `mockito-kotlin` transitively brings in `kotlin-reflect:2.1.20` → `kotlin-stdlib:2.1.20`. IntelliJ 2025.3+ requires `SequencesKt.sequenceOf(T)` (non-vararg, added in Kotlin 2.2.x). An explicit `testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")` in `move-tab-plugin/build.gradle.kts` forces Gradle to resolve the conflict to 2.2.21.
+
+## Plugin Icon
+
+* `pluginIcon.svg` lives in `docs/` (alongside `CHANGELOG.html`) as a project-level asset.
+* A `processResources` block in the root `build.gradle.kts` copies it into `META-INF/` at build time — JetBrains requires it there in the final plugin JAR.
+
+
 
 * `org.gradle.internal.deprecation.DeprecatableConfiguration` was removed in Gradle 9. Do not use internal Gradle APIs; use only stable public Gradle APIs.
 * The `resolveDependencies` task in `move-tab-plugin/build.gradle.kts` resolves all configurations via `doLast` (it is intentionally incompatible with the configuration cache).
