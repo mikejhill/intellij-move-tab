@@ -35,10 +35,16 @@ Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions 
 * `pluginIcon.svg` lives in `docs/` (alongside `CHANGELOG.html`) as a project-level asset.
 * A `processResources` block in the root `build.gradle.kts` copies it into `META-INF/` at build time — JetBrains requires it there in the final plugin JAR.
 
-## Dependency Notes
+## Plugin Structure
 
-* `org.gradle.internal.deprecation.DeprecatableConfiguration` was removed in Gradle 9. Do not use internal Gradle APIs; use only stable public Gradle APIs.
-* The `resolveDependencies` task in `move-tab-plugin/build.gradle.kts` resolves all configurations via `doLast` (it is intentionally incompatible with the configuration cache).
+* **Actions**: `MoveTabLeft`, `MoveTabRight`, `MoveTabToStart`, `MoveTabToEnd` — all extend `MoveTab` in `move-tab-plugin/src/main/kotlin/com/mikejhill/intellij/movetab/actions/`
+* **Settings**: `MoveTabSettings` (singleton backed by `PropertiesComponent`) and `MoveTabConfigurable` (settings UI) in `.../settings/`
+* **plugin.xml**: Lives at `src/main/resources/META-INF/plugin.xml` in the **root** project (not the module). This is canonical for IJPGP 2.x multi-module projects; `patchPluginXml` only operates on the root. The module test classpath adds `rootProject.files("src/main/resources")` so tests can discover it.
+* **Default shortcuts**: Move Left = `Ctrl+Shift+Page Up`, Move Right = `Ctrl+Shift+Page Down`. Move to Start and Move to End have no defaults (users assign via Keymap).
+
+## Dependabot
+
+* `jackson-core` is a transitive dep supplied by IntelliJ; it cannot be updated independently. An `ignore` rule in `.github/dependabot.yml` prevents Dependabot from generating failing security-update jobs for it.
 
 ## Commit Messages
 
