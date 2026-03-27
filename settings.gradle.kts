@@ -40,8 +40,6 @@ plugins {
 
 rootProject.name = "intellij-move-tab"
 
-include("move-tab-plugin")
-
 develocity {
     buildScan {
         capture { fileFingerprints.set(true) }

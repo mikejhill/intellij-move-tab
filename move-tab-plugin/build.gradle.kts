@@ -1,10 +1,10 @@
-/*
+﻿/*
  * MIT License
  *
  * Copyright (c) 2025 Michael Hill
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the “Software”), to deal
+ * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
@@ -13,7 +13,7 @@
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -22,56 +22,8 @@
  * THE SOFTWARE.
  */
 
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-
-plugins {
-    id("java")
-    kotlin("jvm") version "2.2.21"
-    id("org.jetbrains.intellij.platform.module")
-}
-
-group = "com.mikejhill"
-version = "2.2.0"
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-tasks.withType<Test> {
-    useJUnit()
-    // The root project holds plugin.xml (required by IJPGP 2.x multi-module structure).
-    // Add it to the test classpath so the IntelliJ test framework can discover and
-    // register actions declared there.
-    classpath += rootProject.files("src/main/resources")
-}
-
-dependencies {
-    intellijPlatform {
-        intellijIdea("2025.3.4")
-        testFramework(TestFrameworkType.Platform)
-    }
-    // Force Kotlin stdlib to 2.2.21+: IntelliJ 2025.3 requires SequencesKt.sequenceOf(T) (added in 2.2.x)
-    // mockito-kotlin transitively brings in kotlin-reflect:2.1.20 → kotlin-stdlib:2.1.20 which lacks it.
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
-    // Required for BasePlatformTestCase (see FAQ about JUnit5 tests referring to JUnit4
-    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4)
-    testImplementation("junit:junit:4.13.2")
-}
-
-tasks.register("resolveDependencies") {
-    group = "custom"
-    notCompatibleWithConfigurationCache("Dependency resolution must occur on each execution.")
-    doLast {
-        val count = project.configurations
-            .filter { it.isCanBeResolved }
-            .sumOf { config -> runCatching { config.resolve().size }.getOrElse { 0 } }
-        println("Resolved all dependencies ($count files).")
-    }
-}
+// This module is no longer included in settings.gradle.kts.
+// All Kotlin sources and tests were consolidated into the root project
+// to fix a classloading issue where IntelliJ 2025.3+ would not load
+// lib/modules/*.jar without an explicit <content> declaration that the
+// IntelliJ test framework cannot process at test time.
