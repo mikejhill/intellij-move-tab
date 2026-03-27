@@ -42,7 +42,7 @@ jobs:
         env:
           CI: true
         run: |
-          ./gradlew :move-tab-plugin:assemble
+          ./gradlew :assemble
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.34.1
         with:
