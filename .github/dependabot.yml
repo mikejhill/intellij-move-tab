@@ -8,3 +8,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # jackson-core is a transitive dependency supplied by the IntelliJ platform;
+      # it cannot be updated independently and security alerts for it are not actionable.
+      - dependency-name: "com.fasterxml.jackson.core:jackson-core"

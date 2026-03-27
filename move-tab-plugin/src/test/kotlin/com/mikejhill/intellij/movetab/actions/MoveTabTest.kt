@@ -40,6 +40,7 @@ import com.intellij.openapi.project.impl.ProjectImpl
 import com.intellij.testFramework.HeavyPlatformTestCase
 import com.intellij.testFramework.registerOrReplaceServiceInstance
 import java.nio.charset.Charset
+import com.mikejhill.intellij.movetab.settings.MoveTabSettings
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -50,6 +51,8 @@ class MoveTabTest : HeavyPlatformTestCase() {
     companion object {
         val ACTION_MOVE_LEFT = MoveTabLeft::class.qualifiedName!!
         val ACTION_MOVE_RIGHT = MoveTabRight::class.qualifiedName!!
+        val ACTION_MOVE_TO_START = MoveTabToStart::class.qualifiedName!!
+        val ACTION_MOVE_TO_END = MoveTabToEnd::class.qualifiedName!!
     }
 
     override fun setUp() {
@@ -63,6 +66,11 @@ class MoveTabTest : HeavyPlatformTestCase() {
             fileEditorManager,
             testRootDisposable
         )
+    }
+
+    override fun tearDown() {
+        MoveTabSettings.wrapAround = true
+        super.tearDown()
     }
 
 
@@ -282,5 +290,155 @@ class MoveTabTest : HeavyPlatformTestCase() {
         invokeAction(ACTION_MOVE_RIGHT)
         invokeAction(ACTION_MOVE_RIGHT) // Validate "checking" the order on intermediate moves does not impact (Schrödinger's cat)
         assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 5, 3))
+    }
+
+
+    /* ********************************************************************** */
+    /* Move to Start / Move to End                                             */
+    /* ********************************************************************** */
+
+
+    @Test
+    fun move_to_start_when_no_window() {
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+    @Test
+    fun move_to_end_when_no_window() {
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf())
+    }
+
+    @Test
+    fun move_to_start_single_tab() {
+        openFiles(1)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1))
+    }
+
+    @Test
+    fun move_to_end_single_tab() {
+        openFiles(1)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1))
+    }
+
+    @Test
+    fun move_to_start_from_first() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+    @Test
+    fun move_to_start_from_middle() {
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(3, 1, 2, 4, 5))
+    }
+
+    @Test
+    fun move_to_start_from_last() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(5, 1, 2, 3, 4))
+    }
+
+    @Test
+    fun move_to_end_from_first() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 4, 5, 1))
+    }
+
+    @Test
+    fun move_to_end_from_middle() {
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 5, 3))
+    }
+
+    @Test
+    fun move_to_end_from_last() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+    @Test
+    fun move_to_start_then_end() {
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(3, 1, 2, 4, 5))
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 5, 3))
+    }
+
+
+    /* ********************************************************************** */
+    /* Wrap-around disabled                                                    */
+    /* ********************************************************************** */
+
+
+    @Test
+    fun move_left_no_wrap_from_first() {
+        MoveTabSettings.wrapAround = false
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+    @Test
+    fun move_right_no_wrap_from_last() {
+        MoveTabSettings.wrapAround = false
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3, 4, 5))
+    }
+
+    @Test
+    fun move_left_no_wrap_from_middle() {
+        MoveTabSettings.wrapAround = false
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 2, 4, 5))
+    }
+
+    @Test
+    fun move_right_no_wrap_from_middle() {
+        MoveTabSettings.wrapAround = false
+        openFiles(5)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 3, 5))
+    }
+
+    @Test
+    fun move_left_wrap_enabled_still_wraps() {
+        openFiles(5)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(2, 3, 4, 5, 1))
+    }
+
+    @Test
+    fun move_right_wrap_enabled_still_wraps() {
+        openFiles(5)
+        selectFile(5)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(5, 1, 2, 3, 4))
     }
 }

@@ -13,6 +13,10 @@ Plugin page: <https://plugins.jetbrains.com/plugin/13087-movetab>
 
 * **Ctrl+Shift+Page Up** – move the current tab to the left
 * **Ctrl+Shift+Page Down** – move the current tab to the right
+* **Move Tab to Start** – move the current tab to the first position (no default shortcut; assign via **Settings > Keymap**)
+* **Move Tab to End** – move the current tab to the last position (no default shortcut; assign via **Settings > Keymap**)
+
+Wrap-around behavior for Move Tab Left/Right is configurable via **Settings > Editor > Move Tab**.
 
 Based on the original plugin
 by [momomo.com](https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com).

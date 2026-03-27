@@ -37,8 +37,10 @@
 				<ul>
 					<li>Ctrl+Shift+Page Up: Move the current tab to the left.</li>
 					<li>Ctrl+Shift+Page Down: Move the current tab to the right.</li>
+					<li>Move Tab to Start / Move Tab to End: No default shortcuts; assign via Settings &gt; Keymap.</li>
 				</ul>
 			</p>
+			<p>Configure wrap-around behavior via Settings &gt; Editor &gt; Move Tab.</p>
 		]]>
     </description>
 
@@ -57,8 +59,19 @@
                 text="Move Tab Right">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift PAGE_DOWN"/>
         </action>
+        <action id="com.mikejhill.intellij.movetab.actions.MoveTabToStart"
+                class="com.mikejhill.intellij.movetab.actions.MoveTabToStart"
+                text="Move Tab to Start"/>
+        <action id="com.mikejhill.intellij.movetab.actions.MoveTabToEnd"
+                class="com.mikejhill.intellij.movetab.actions.MoveTabToEnd"
+                text="Move Tab to End"/>
     </actions>
 
-    <extensions defaultExtensionNs="com.intellij"/>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="editor"
+                                 id="com.mikejhill.intellij.movetab.settings.MoveTabConfigurable"
+                                 instance="com.mikejhill.intellij.movetab.settings.MoveTabConfigurable"
+                                 displayName="Move Tab"/>
+    </extensions>
 
 </idea-plugin>
