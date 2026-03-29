@@ -9,6 +9,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      # jackson-core is a transitive dependency supplied by the IntelliJ platform;
-      # it cannot be updated independently and security alerts for it are not actionable.
+      # These are transitive dependencies supplied by the IntelliJ platform;
+      # they cannot be updated independently and security alerts are not actionable.
       - dependency-name: "com.fasterxml.jackson.core:jackson-core"
+      - dependency-name: "io.undertow:undertow-core"
