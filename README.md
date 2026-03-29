@@ -18,6 +18,10 @@ Plugin page: <https://plugins.jetbrains.com/plugin/13087-movetab>
 
 Wrap-around behavior for Move Tab Left/Right is configurable via **Settings > Editor > Move Tab**.
 
+> **Note:** The default shortcuts (`Ctrl+Shift+Page Up` / `Ctrl+Shift+Page Down`) conflict with IntelliJ's
+> built-in **Move Caret to Page Top/Bottom with Selection** actions. Installing this plugin overrides those
+> bindings when the editor is active. You can reassign either action in **Settings > Keymap** to restore them.
+
 Based on the original plugin
 by [momomo.com](https://plugins.jetbrains.com/plugin/8443-a-move-tab-left-and-right-using-the-keyboard-plugin--by-momomo-com).
 

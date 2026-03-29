@@ -32,7 +32,7 @@ import javax.swing.JPanel
 
 class MoveTabConfigurable : Configurable {
 
-    private lateinit var wrapAroundCheckBox: JCheckBox
+    private var wrapAroundCheckBox: JCheckBox? = null
 
     override fun getDisplayName(): String = "Move Tab"
 
@@ -41,13 +41,17 @@ class MoveTabConfigurable : Configurable {
         return JPanel(BorderLayout()).apply { add(wrapAroundCheckBox, BorderLayout.NORTH) }
     }
 
-    override fun isModified(): Boolean = wrapAroundCheckBox.isSelected != MoveTabSettings.wrapAround
+    override fun isModified(): Boolean = wrapAroundCheckBox?.isSelected != MoveTabSettings.wrapAround
 
     override fun apply() {
-        MoveTabSettings.wrapAround = wrapAroundCheckBox.isSelected
+        MoveTabSettings.wrapAround = wrapAroundCheckBox?.isSelected ?: return
     }
 
     override fun reset() {
-        wrapAroundCheckBox.isSelected = MoveTabSettings.wrapAround
+        wrapAroundCheckBox?.isSelected = MoveTabSettings.wrapAround
+    }
+
+    override fun disposeUIResources() {
+        wrapAroundCheckBox = null
     }
 }

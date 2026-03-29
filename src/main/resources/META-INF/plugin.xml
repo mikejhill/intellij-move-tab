@@ -41,6 +41,12 @@
 				</ul>
 			</p>
 			<p>Configure wrap-around behavior via Settings &gt; Editor &gt; Move Tab.</p>
+			<p>
+				<b>Note:</b> The default shortcuts (Ctrl+Shift+Page Up / Ctrl+Shift+Page Down) conflict with
+				IntelliJ's built-in <i>Move Caret to Page Top/Bottom with Selection</i> actions. Installing this
+				plugin overrides those bindings when the editor is active. You can reassign either action in
+				Settings &gt; Keymap to restore them.
+			</p>
 		]]>
     </description>
 
