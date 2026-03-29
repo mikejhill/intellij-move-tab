@@ -73,7 +73,7 @@ dependencies {
     }
     // Force Kotlin stdlib to 2.2.21+: IntelliJ 2025.3 requires APIs added in Kotlin 2.2.x.
     // mockito-kotlin transitively brings in kotlin-stdlib:2.1.20 which lacks them.
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     testImplementation("junit:junit:4.13.2")
 }
