@@ -47,13 +47,15 @@ jobs:
           curl -L -o semrel https://registry.go-semantic-release.xyz/downloads/linux/amd64/semantic-release
           chmod +x semrel
           ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes --no-ci 2>&1 | tee semrel.log
+          # In --dry mode, semrel logs the version but may not write .version-unreleased.
+          # Try the file first, then fall back to parsing the log.
           if [ -f .version-unreleased ]; then
               version=$(cat .version-unreleased)
               rm .version-unreleased
           else
-              version=""
+              version=$(grep -m1 -oP 'new version: \K[0-9]+\.[0-9]+\.[0-9]+' semrel.log || true)
           fi
-          previous=$(grep -m1 -oE 'found version: [^ ]+' semrel.log | awk '{print $3}')
+          previous=$(grep -m1 -oP 'found version: \K[^ ]+' semrel.log || true)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "previous=$previous" >> "$GITHUB_OUTPUT"
       - name: Show Predicted Version
