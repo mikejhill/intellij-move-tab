@@ -25,14 +25,21 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ -f .version ]; then
+          # The action sets an output; the binary may also write .version.
+          # Try action output first, then file, then latest git tag.
+          version="${{ steps.semrel.outputs.version }}"
+          if [ -z "$version" ] && [ -f .version ]; then
               version=$(cat .version)
-              echo "value=$version" >> "$GITHUB_OUTPUT"
-              echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
-          else
-              echo "::error::No .version file found — go-semantic-release did not produce a version"
+          fi
+          if [ -z "$version" ]; then
+              version=$(git tag -l 'v*' --sort=-version:refname | head -1 | sed 's/^v//')
+          fi
+          if [ -z "$version" ]; then
+              echo "::error::Could not determine release version"
               exit 1
           fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:
