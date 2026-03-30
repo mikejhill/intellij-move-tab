@@ -51,6 +51,14 @@ This is a single-module project. All Kotlin sources live in `src/main/kotlin/` a
 
 * `jackson-core` is a transitive dep supplied by IntelliJ; it cannot be updated independently. An `ignore` rule in `.github/dependabot.yml` prevents Dependabot from generating failing security-update jobs for it.
 
+## Versioning and Release
+
+* Versioning is fully automated via [go-semantic-release](https://github.com/go-semantic-release/action), which computes the next version from conventional commits since the last git tag.
+* `build.gradle.kts` uses `findProperty("pluginVersion") ?: "0.0.0-dev"` — the real version is injected by the publish workflow from the git tag.
+* **Do not hardcode versions** in `build.gradle.kts`. The release workflow creates a `vX.Y.Z` tag; the publish workflow extracts `X.Y.Z` and passes it via `-PpluginVersion=X.Y.Z`.
+* The changelog (`docs/CHANGELOG.html`) must be updated manually before triggering a release, using the version that `go-semantic-release` will compute (check the "Predict Next Version" step in the verify workflow).
+* Tag protection rulesets: tag-create protection is **disabled** (the release workflow needs to create tags); tag-delete protection remains **active** to prevent accidental deletion.
+
 ## Commit Messages
 
 * Use the [semantic-release](https://github.com/semantic-release/semantic-release) style.

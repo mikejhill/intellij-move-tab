@@ -9,7 +9,9 @@ plugins {
     id("org.jetbrains.intellij.platform")
 }
 
-version = "2.3.0"
+// Version is set by the publish workflow from the git tag (e.g. -PpluginVersion=2.2.0).
+// Local/CI builds use a dev placeholder; the real version is determined by go-semantic-release.
+version = findProperty("pluginVersion")?.toString() ?: "0.0.0-dev"
 
 java {
     toolchain {
