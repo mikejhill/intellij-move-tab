@@ -36,9 +36,9 @@ Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions 
 
 ## Project Structure
 
-This is a single-module project. All Kotlin sources live in `src/main/kotlin/` and tests in `src/test/kotlin/` at the root level. The `move-tab-plugin/` directory is a leftover from the former multi-module layout and is **not** included in `settings.gradle.kts`.
+This is a single-module project. All Kotlin sources live in `src/main/kotlin/` and tests in `src/test/kotlin/` at the root level.
 
-> **Why consolidated?** IJPGP 2.x multi-module builds place sub-module classes in `lib/modules/*.jar`. IntelliJ 2025.3+ does not auto-load those JARs without a `<content>` declaration in `plugin.xml`. However, the IntelliJ test framework (`HeavyPlatformTestCase`) does not process `<content>` elements, so the module's classes are not found at test time. Consolidating everything into the root project avoids this classloading mismatch.
+> **Why not multi-module?** IJPGP 2.x multi-module builds place sub-module classes in `lib/modules/*.jar`. IntelliJ 2025.3+ does not auto-load those JARs without a `<content>` declaration in `plugin.xml`. However, the IntelliJ test framework (`HeavyPlatformTestCase`) does not process `<content>` elements, so the module's classes are not found at test time. A single-module layout avoids this classloading mismatch entirely.
 
 ## Plugin Structure
 
