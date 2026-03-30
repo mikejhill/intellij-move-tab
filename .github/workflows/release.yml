@@ -1,0 +1,58 @@
+name: Release and Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/master'
+    name: Create Tag, Build, and Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Create Release Tag
+        id: semrel
+        uses: go-semantic-release/action@v1.24.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Version
+        id: version
+        shell: bash
+        run: |
+          if [ -f .version ]; then
+              version=$(cat .version)
+              echo "value=$version" >> "$GITHUB_OUTPUT"
+              echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
+          else
+              echo "::error::No .version file found — go-semantic-release did not produce a version"
+              exit 1
+          fi
+      - name: Setup Java
+        uses: actions/setup-java@v5.2.0
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Build and Verify
+        env:
+          CI: true
+        run: |
+          ./gradlew check verifyPlugin -PpluginVersion=${{ steps.version.outputs.value }}
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: intellij-move-tab-${{ steps.version.outputs.value }}
+          path: build/distributions/*.zip
+      - name: Publish Plugin
+        env:
+          publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
+        run: |
+          ./gradlew publishPlugin -PpluginVersion=${{ steps.version.outputs.value }}
+
