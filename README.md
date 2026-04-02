@@ -103,13 +103,15 @@ tag.
    the changes.
 3. Trigger the **Release and Publish** workflow manually from the `master` branch
    via GitHub Actions.
-4. The workflow computes the next `vX.Y.Z` tag, creates a GitHub release with
-   generated release notes, builds and verifies the plugin, and publishes it to
+4. The workflow determines the next version (dry-run), runs the full build and
+   test suite, then creates a `vX.Y.Z` tag and GitHub Release with the plugin
+   artifact attached. A separate environment-gated job publishes the plugin to
    the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13087-movetab).
 
-> **Note:** The release and publish steps are combined in a single workflow
-> (`release.yml`). This avoids the `GITHUB_TOKEN` limitation where tags created
-> by GitHub Actions do not trigger other workflows.
+> **Note:** The release workflow validates the build **before** creating any tags.
+> If the build fails, no tag or release is created. Publishing uses a
+> `jetbrains-marketplace` GitHub environment for audit trail and optional
+> approval gating.
 
 ## Contributing
 
@@ -117,7 +119,8 @@ This project uses
 [Conventional Commits](https://www.conventionalcommits.org/). Format each commit
 subject as `type(scope): message` — for example, `feat(actions): add move to
 start`. Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`,
-`test`, `build`, `ci`, `chore`, `revert`.
+`test`, `build`, `ci`, `chore`, `revert`. PR titles are validated automatically
+by CI.
 
 ## Acknowledgments
 

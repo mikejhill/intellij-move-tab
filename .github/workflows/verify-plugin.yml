@@ -2,32 +2,53 @@ name: Build and Verify Plugin
 
 on:
   push:
-    branches: [ '*' ]
-    tags-ignore: [ '*' ]
+    branches: ['*']
+    tags-ignore: ['*']
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
   pull_request:
-    branches: [ '*' ]
+    branches: ['*']
+  merge_group:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  commit-lint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  markdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v23.0.0
+        with:
+          globs: '**/*.md'
+
   build:
-    name: Build and Verify Plugin
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      contents: read
-      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
-      - name: Lint Markdown
-        uses: DavidAnson/markdownlint-cli2-action@v23.0.0
-        with:
-          globs: '**/*.md'
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:
@@ -67,3 +88,20 @@ jobs:
               version="${{ steps.semrel.outputs.previous }} (insufficient changes for new version)"
           fi
           echo "Next release version if created from this commit: **$version**" >> "$GITHUB_STEP_SUMMARY"
+
+  ci-pass:
+    if: always()
+    needs: [commit-lint, markdown, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify all jobs passed
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+            echo "::error::One or more required jobs failed"
+            exit 1
+          fi
+          if [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            echo "::error::One or more required jobs were cancelled"
+            exit 1
+          fi

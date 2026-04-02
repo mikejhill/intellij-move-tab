@@ -2,44 +2,58 @@ name: Release and Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      force-patch:
+        description: 'Force a patch bump when no releasable commits exist'
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     if: github.ref == 'refs/heads/master'
-    name: Create Tag, Build, and Publish
+    name: Release
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: write
+      attestations: write
+      id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
-      - name: Create Release Tag
+
+      - name: Determine next version
         id: semrel
         uses: go-semantic-release/action@v1.24.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract Version
+          allow-initial-development-versions: true
+          force-bump-patch-version: ${{ inputs.force-patch }}
+          dry: true
+
+      - name: Require version bump
         id: version
         shell: bash
         run: |
-          # The action sets an output; the binary may also write .version.
-          # Try action output first, then file, then latest git tag.
           version="${{ steps.semrel.outputs.version }}"
-          if [ -z "$version" ] && [ -f .version ]; then
-              version=$(cat .version)
+          if [ -z "$version" ] && [ -f .version-unreleased ]; then
+            version=$(cat .version-unreleased)
           fi
           if [ -z "$version" ]; then
-              version=$(git tag -l 'v*' --sort=-version:refname | head -1 | sed 's/^v//')
-          fi
-          if [ -z "$version" ]; then
-              echo "::error::Could not determine release version"
-              exit 1
+            echo "::error::No releasable commits found. Use force-patch or add feat:/fix: commits."
+            exit 1
           fi
           echo "value=$version" >> "$GITHUB_OUTPUT"
           echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:
@@ -47,19 +61,54 @@ jobs:
           distribution: temurin
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+
       - name: Build and Verify
         env:
           CI: true
+        run: ./gradlew check verifyPlugin -PpluginVersion=${{ steps.version.outputs.value }}
+
+      - name: Create tag
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
         run: |
-          ./gradlew check verifyPlugin -PpluginVersion=${{ steps.version.outputs.value }}
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v7.0.0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: intellij-move-tab-${{ steps.version.outputs.value }}
-          path: build/distributions/*.zip
+          tag_name: v${{ steps.version.outputs.value }}
+          name: v${{ steps.version.outputs.value }}
+          generate_release_notes: true
+          files: build/distributions/*.zip
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: build/distributions/*.zip
+
+  publish:
+    needs: release
+    name: Publish to JetBrains Marketplace
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    environment: jetbrains-marketplace
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+      - name: Setup Java
+        uses: actions/setup-java@v5.2.0
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
       - name: Publish Plugin
         env:
           publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
-        run: |
-          ./gradlew publishPlugin -PpluginVersion=${{ steps.version.outputs.value }}
+        run: ./gradlew publishPlugin -PpluginVersion=${{ needs.release.outputs.version }}
 

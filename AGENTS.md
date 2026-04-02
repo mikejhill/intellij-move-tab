@@ -55,10 +55,11 @@ This is a single-module project. All Kotlin sources live in `src/main/kotlin/` a
 
 * Versioning is fully automated via [go-semantic-release](https://github.com/go-semantic-release/action), which computes the next version from conventional commits since the last git tag.
 * `build.gradle.kts` uses `findProperty("pluginVersion") ?: "0.0.0-dev"` — the real version is injected by the publish workflow from the git tag.
-* **Do not hardcode versions** in `build.gradle.kts`. The release workflow creates a `vX.Y.Z` tag; extracts `X.Y.Z` from the semrel-generated `.version` file; and passes it to Gradle via `-PpluginVersion=X.Y.Z`.
-* The release and publish steps are combined in a single `release.yml` workflow (triggered by `workflow_dispatch` on `master`). This avoids the `GITHUB_TOKEN` limitation where tags created by Actions do not trigger other workflows.
+* **Do not hardcode versions** in `build.gradle.kts`. The release workflow determines the version via dry-run, validates the build, then creates a `vX.Y.Z` tag and passes it to Gradle via `-PpluginVersion=X.Y.Z`.
+* `release.yml` (triggered by `workflow_dispatch` on `master`) has two jobs: **Release** (version, build, tag, GitHub Release) and **Publish** (pushes to JetBrains Marketplace using the `jetbrains-marketplace` environment).
 * The changelog (`docs/CHANGELOG.html`) must be updated manually before triggering a release, using the version that `go-semantic-release` will compute (check the "Predict Next Version" step in the verify workflow).
 * Tag protection rulesets: tag-create protection is **disabled** (the release workflow needs to create tags); tag-delete protection remains **active** to prevent accidental deletion.
+* The CI workflow (`verify-plugin.yml`) uses a `ci-pass` aggregator job as the single required status check for branch protection. Update branch protection to require `ci-pass` (not `Build and Verify Plugin`).
 
 ## Commit Messages
 

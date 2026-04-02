@@ -69,12 +69,14 @@ Three GitHub Actions workflows automate the development lifecycle:
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| **Build and Verify Plugin** | Push, PR | Lints markdown, builds, tests, verifies plugin descriptor, predicts next version |
-| **Release and Publish** | Manual (`workflow_dispatch`) | Creates semantic version tag, builds, publishes to JetBrains Marketplace |
+| **Build and Verify Plugin** | Push, PR, merge group | Lint markdown, validate PR titles, build, test, verify plugin, predict next version |
+| **Release and Publish** | Manual (`workflow_dispatch`) | Determines version (dry-run), validates build, creates tag, GitHub Release, publishes to JetBrains Marketplace |
 | **CodeQL Analysis** | Push, PR, weekly schedule | Static security analysis for Java/Kotlin |
 
-See the [Releasing section in the README](../README.md#releasing) for the full
-release workflow.
+The CI workflow runs parallel jobs (`commit-lint`, `markdown`, `build`) with a
+`ci-pass` aggregator job serving as the single required status check for branch
+protection. The release workflow validates the build before creating any tags
+and publishes via an environment-gated job (`jetbrains-marketplace`).
 
 ## Design Decisions
 
