@@ -2,7 +2,7 @@
 
 * Gradle commands are time-consuming because they download large dependencies. Avoid running any Gradle commands (such as `gradle` or `./gradlew`) in this repository.
 * If Gradle commands are necessary, ensure the Gradle Wrapper (`./gradlew`) is always used instead of `PATH`-based Gradle (`gradle`).
-* There are no mandatory programmatic checks for this repository.
+* Before pushing, lint Markdown files with `npx markdownlint-cli2 "**/*.md"`. CI enforces this via the `DavidAnson/markdownlint-cli2-action` in `verify-plugin.yml`.
 * `AGENTS.md` should be continually updated when new or helpful standards or conventions are brought up during interactions.
 * Follow `.editorconfig` conventions when adding or modifying files.
 * Code scanning with CodeQL is configured in `.github/workflows/codeql.yml` and uses Java 21. The CodeQL config file (`.github/codeql/codeql-config.yml`) is referenced by that workflow; keep the Java version in the workflow in sync with the build toolchain version in `build.gradle.kts`.

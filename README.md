@@ -57,8 +57,8 @@ Wrap-around behavior for Move Tab Left/Right is configurable via
 ./gradlew check verifyPlugin
 ```
 
-This compiles the plugin, runs unit tests, lints Markdown files, and verifies
-the plugin descriptor against IntelliJ IDEA 2025.3.4.
+This compiles the plugin, runs unit tests, and verifies the plugin descriptor
+against IntelliJ IDEA 2025.3.4.
 
 ### Project Structure
 
