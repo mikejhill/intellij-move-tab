@@ -1,9 +1,43 @@
-### JetBrains template
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+### Base Template
+# This template covers universal patterns only. Language and framework-specific
+# patterns should be appended to this template based on specific project needs:
+# https://github.com/github/gitignore
 
-# Ignore all .idea files — project settings are not shared via git
+# Agent and Developer Temporary Files
+.tmp/
+
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+
+# OS-Generated Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+._*
+
+# Editor and IDE
+*.swp
+*.swo
+*~
 .idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Build Artifacts
+dist/
+build/
+out/
+
+### JetBrains Template
+# Covers JetBrains IDEs: IntelliJ, GoLand, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -67,6 +101,7 @@ atlassian-ide-plugin.xml
 
 # SonarLint plugin
 .idea/sonarlint/
+.idea/sonarlint.xml # see https://community.sonarsource.com/t/is-the-file-idea-idea-idea-sonarlint-xml-intended-to-be-under-source-control/121119
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
@@ -74,16 +109,24 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# Editor-based Rest Client
+# Editor-based HTTP Client
 .idea/httpRequests
+http-client.private.env.json
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-### Gradle template
+# Apifox Helper cache
+.idea/.cache/.Apifox_Helper
+.idea/ApifoxUploaderProjectSetting.xml
+
+# Github Copilot persisted session migrations, see: https://github.com/microsoft/copilot-intellij-feedback/issues/712#issuecomment-3322062215
+.idea/**/copilot.data.migration.*.xml
+
+### Gradle Template
 .gradle
 **/build/
-!src/**/build/
+!**/src/**/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -103,28 +146,7 @@ gradle-app.setting
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-### Vim template
-# Swap
-[._]*.s[a-v][a-z]
-!*.svg  # comment out if you don't need vector files
-[._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
-
-# Session
-Session.vim
-Sessionx.vim
-
-# Temporary
-.netrwhist
-*~
-# Auto-generated tag files
-tags
-# Persistent undo
-[._]*.un~
-
-### Kotlin template
+### Java Template
 # Compiled class file
 *.class
 
@@ -150,11 +172,28 @@ tags
 hs_err_pid*
 replay_pid*
 
-### Custom
-.idea/$*
+### Project-Specific Rules
+# Re-include .idea/ for shareable project settings (overrides base template)
+!.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/copyright/
+!.idea/compiler.xml
+!.idea/kotlinc.xml
+!.idea/misc.xml
+!.idea/vcs.xml
+!.idea/IntelliLang.xml
+
+# Gradle auto-import generated files
 .idea/modules/
 .idea/modules.xml
 .idea/**/*.iml
 .idea/jarRepositories.xml
+.idea/$*
+
+# IntelliJ Platform Gradle Plugin
 .intellijPlatform/
+
+# Kotlin compiler
 .kotlin/
