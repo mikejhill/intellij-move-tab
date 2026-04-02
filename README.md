@@ -73,7 +73,6 @@ src/main/resources/META-INF/
 └── plugin.xml        # Plugin descriptor (actions, extensions, shortcuts)
 docs/
 ├── architecture.md   # Design and architecture notes
-├── CHANGELOG.html    # Changelog shown on the JetBrains Marketplace
 ├── decisions/        # Architecture Decision Records (ADRs)
 └── pluginIcon.svg    # Plugin icon (copied into META-INF at build time)
 ```
@@ -99,19 +98,21 @@ tag.
 
 1. Every push runs the **Build and Verify Plugin** workflow, which includes a
    "Predict Next Version" step showing what the next release version would be.
-2. Update `docs/CHANGELOG.html` with the predicted version and a description of
-   the changes.
+2. Add entries under `## [Unreleased]` in `CHANGELOG.md` as you work (follows
+   [Keep a Changelog](https://keepachangelog.com/) format).
 3. Trigger the **Release and Publish** workflow manually from the `master` branch
-   via GitHub Actions.
-4. The workflow determines the next version (dry-run), runs the full build and
-   test suite, then creates a `vX.Y.Z` tag and GitHub Release with the plugin
-   artifact attached. A separate environment-gated job publishes the plugin to
-   the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13087-movetab).
+   via GitHub Actions. Use the **dry-run** option to validate the full pipeline
+   without creating tags or publishing.
+4. The workflow determines the next version, promotes `[Unreleased]` in the
+   changelog, runs the full build and test suite, commits the changelog update,
+   then creates a `vX.Y.Z` tag and GitHub Release with the plugin artifact
+   attached. A separate environment-gated job publishes the plugin to the
+   [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13087-movetab).
 
 > **Note:** The release workflow validates the build **before** creating any tags.
-> If the build fails, no tag or release is created. Publishing uses a
-> `jetbrains-marketplace` GitHub environment for audit trail and optional
-> approval gating.
+> If the build fails, no tag or release is created. `CHANGELOG.md` is
+> automatically converted to HTML for the JetBrains Marketplace by the
+> `changelogToHtml()` function in `build.gradle.kts`.
 
 ## Contributing
 

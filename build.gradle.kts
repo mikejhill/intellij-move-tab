@@ -33,7 +33,7 @@ tasks.withType<RunIdeTask> {
 
 intellijPlatform {
     pluginConfiguration {
-        changeNotes = project.provider { rootProject.file("docs/CHANGELOG.html").readText() }
+        changeNotes = project.provider { changelogToHtml() }
     }
     pluginVerification {
         ides {
@@ -97,4 +97,63 @@ tasks.register("resolveDependencies") {
 
 fun getPropertyValue(name: String): String? {
     return if (project.extra.has(name)) project.extra[name]?.toString() else System.getenv(name)
+}
+
+/**
+ * Converts CHANGELOG.md (Keep a Changelog format) to an HTML fragment for
+ * the JetBrains Marketplace change-notes field. Skips the [Unreleased]
+ * section and produces a nested `<ul>` matching the format JetBrains renders.
+ */
+fun changelogToHtml(): String {
+    val file = rootProject.file("CHANGELOG.md")
+    if (!file.exists()) return ""
+
+    val html = StringBuilder("<ul>\n")
+    var currentVersion = ""
+    val items = mutableListOf<String>()
+    var active = false
+
+    fun flush() {
+        if (currentVersion.isEmpty() || items.isEmpty()) {
+            items.clear()
+            return
+        }
+        if (items.size == 1) {
+            html.appendLine("    <li>$currentVersion: ${items[0]}</li>")
+        } else {
+            html.appendLine("    <li>$currentVersion:")
+            html.appendLine("        <ul>")
+            items.forEach { html.appendLine("            <li>$it</li>") }
+            html.appendLine("        </ul>")
+            html.appendLine("    </li>")
+        }
+        items.clear()
+    }
+
+    for (line in file.readLines()) {
+        when {
+            line.startsWith("## [Unreleased]") -> active = false
+            line.startsWith("## [") -> {
+                flush()
+                currentVersion = line.substringAfter("[").substringBefore("]")
+                active = true
+            }
+            !active -> continue
+            line.startsWith("### ") -> { /* skip category headings */ }
+            line.startsWith("- ") -> items.add(markdownLineToHtml(line.removePrefix("- ")))
+        }
+    }
+    flush()
+    html.append("</ul>")
+    return html.toString()
+}
+
+/** Converts inline Markdown (bold, links) to HTML with proper escaping. */
+fun markdownLineToHtml(text: String): String {
+    return text
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace(Regex("\\*\\*(.+?)\\*\\*"), "<b>$1</b>")
+        .replace(Regex("\\[(.+?)]\\((.+?)\\)"), "<a href=\"$2\">$1</a>")
 }

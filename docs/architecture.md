@@ -62,6 +62,11 @@ Key build details:
 - **Kotlin stdlib** — Excluded from the plugin bundle
   (`kotlin.stdlib.default.dependency = false`). IntelliJ provides the stdlib at
   runtime.
+- **Changelog** — `CHANGELOG.md` (Keep a Changelog format) is the single source
+  of truth. The `changelogToHtml()` function in `build.gradle.kts` converts it
+  to an HTML fragment for the JetBrains Marketplace `change-notes` field at
+  build time. The `[Unreleased]` section is skipped; only released versions
+  appear in the plugin.
 
 ## CI/CD Pipeline
 

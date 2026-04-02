@@ -3,6 +3,10 @@ name: Release and Publish
 on:
   workflow_dispatch:
     inputs:
+      dry-run:
+        description: 'Validate the release without creating tags or publishing'
+        type: boolean
+        default: false
       force-patch:
         description: 'Force a patch bump when no releasable commits exist'
         type: boolean
@@ -54,6 +58,27 @@ jobs:
           echo "value=$version" >> "$GITHUB_OUTPUT"
           echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Validate CHANGELOG
+        shell: bash
+        run: |
+          grep -q "^## \[Unreleased\]" CHANGELOG.md || {
+            echo "::error::CHANGELOG.md missing [Unreleased] section"
+            exit 1
+          }
+
+      - name: Promote CHANGELOG
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [$VERSION] - $DATE/" CHANGELOG.md
+          grep -q "## \[$VERSION\]" CHANGELOG.md || {
+            echo "::error::CHANGELOG.md promotion failed — version header not found after sed"
+            exit 1
+          }
+          echo "Promoted [Unreleased] → [$VERSION] - $DATE"
+
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:
@@ -67,16 +92,29 @@ jobs:
           CI: true
         run: ./gradlew check verifyPlugin -PpluginVersion=${{ steps.version.outputs.value }}
 
-      - name: Create tag
+      - name: Dry-run summary
+        if: inputs.dry-run == true
+        shell: bash
+        run: |
+          echo "### Dry Run Complete ✓" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Version **${{ steps.version.outputs.value }}** validated successfully." >> "$GITHUB_STEP_SUMMARY"
+          echo "No tags, releases, or artifacts were created." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit CHANGELOG and create tag
+        if: inputs.dry-run != true
         env:
           VERSION: ${{ steps.version.outputs.value }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore(release): v$VERSION"
           git tag "v$VERSION"
-          git push origin "v$VERSION"
+          git push origin HEAD "v$VERSION"
 
       - name: Create GitHub Release
+        if: inputs.dry-run != true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.value }}
@@ -85,12 +123,14 @@ jobs:
           files: build/distributions/*.zip
 
       - name: Attest build provenance
+        if: inputs.dry-run != true
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: build/distributions/*.zip
 
   publish:
     needs: release
+    if: inputs.dry-run != true
     name: Publish to JetBrains Marketplace
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -100,6 +140,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
+        with:
+          ref: v${{ needs.release.outputs.version }}
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:

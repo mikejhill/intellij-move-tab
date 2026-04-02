@@ -31,7 +31,7 @@ Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions 
 
 ## Plugin Icon
 
-* `pluginIcon.svg` lives in `docs/` (alongside `CHANGELOG.html`) as a project-level asset.
+* `pluginIcon.svg` lives in `docs/` as a project-level asset.
 * A `processResources` block in the root `build.gradle.kts` copies it into `META-INF/` at build time — JetBrains requires it there in the final plugin JAR.
 
 ## Project Structure
@@ -56,8 +56,8 @@ This is a single-module project. All Kotlin sources live in `src/main/kotlin/` a
 * Versioning is fully automated via [go-semantic-release](https://github.com/go-semantic-release/action), which computes the next version from conventional commits since the last git tag.
 * `build.gradle.kts` uses `findProperty("pluginVersion") ?: "0.0.0-dev"` — the real version is injected by the publish workflow from the git tag.
 * **Do not hardcode versions** in `build.gradle.kts`. The release workflow determines the version via dry-run, validates the build, then creates a `vX.Y.Z` tag and passes it to Gradle via `-PpluginVersion=X.Y.Z`.
-* `release.yml` (triggered by `workflow_dispatch` on `master`) has two jobs: **Release** (version, build, tag, GitHub Release) and **Publish** (pushes to JetBrains Marketplace using the `jetbrains-marketplace` environment).
-* The changelog (`docs/CHANGELOG.html`) must be updated manually before triggering a release, using the version that `go-semantic-release` will compute (check the "Predict Next Version" step in the verify workflow).
+* `release.yml` (triggered by `workflow_dispatch` on `master`) has two jobs: **Release** (version, build, tag, GitHub Release) and **Publish** (pushes to JetBrains Marketplace using the `jetbrains-marketplace` environment). A `dry-run` input validates the full pipeline without creating tags or publishing.
+* The changelog follows [Keep a Changelog](https://keepachangelog.com/) format in `CHANGELOG.md` at the project root. Add entries under `## [Unreleased]`. The release workflow automatically promotes `[Unreleased]` to the new version heading and commits the change. The `changelogToHtml()` function in `build.gradle.kts` converts it to HTML for the JetBrains Marketplace `change-notes` field.
 * Tag protection rulesets: tag-create protection is **disabled** (the release workflow needs to create tags); tag-delete protection remains **active** to prevent accidental deletion.
 * The CI workflow (`verify-plugin.yml`) uses a `ci-pass` aggregator job as the single required status check for branch protection. Update branch protection to require `ci-pass` (not `Build and Verify Plugin`).
 
