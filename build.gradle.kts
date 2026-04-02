@@ -81,6 +81,17 @@ dependencies {
 }
 
 
+tasks.register<Exec>("lintMarkdown") {
+    group = "verification"
+    description = "Lints Markdown files with markdownlint-cli2."
+    commandLine("npx", "--yes", "markdownlint-cli2", "**/*.md")
+}
+
+tasks.named("check") {
+    dependsOn("lintMarkdown")
+}
+
+
 tasks.register("resolveDependencies") {
     group = "custom"
     notCompatibleWithConfigurationCache("Dependency resolution must occur on each execution.")

@@ -68,7 +68,7 @@ Key build details:
 Three GitHub Actions workflows automate the development lifecycle:
 
 | Workflow | Trigger | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | **Build and Verify Plugin** | Push, PR | Lints markdown, builds, tests, verifies plugin descriptor, predicts next version |
 | **Release and Publish** | Manual (`workflow_dispatch`) | Creates semantic version tag, builds, publishes to JetBrains Marketplace |
 | **CodeQL Analysis** | Push, PR, weekly schedule | Static security analysis for Java/Kotlin |

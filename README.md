@@ -29,7 +29,7 @@ targets the merged IC/IU distribution introduced in 2025.3.
 ## Usage
 
 | Action | Default Shortcut |
-|---|---|
+| --- | --- |
 | Move Tab Left | `Ctrl+Shift+Page Up` |
 | Move Tab Right | `Ctrl+Shift+Page Down` |
 | Move Tab to Start | *(none — assign via Settings > Keymap)* |
@@ -57,8 +57,8 @@ Wrap-around behavior for Move Tab Left/Right is configurable via
 ./gradlew check verifyPlugin
 ```
 
-This compiles the plugin, runs unit tests, and verifies the plugin descriptor
-against IntelliJ IDEA 2025.3.4.
+This compiles the plugin, runs unit tests, lints Markdown files, and verifies
+the plugin descriptor against IntelliJ IDEA 2025.3.4.
 
 ### Project Structure
 
