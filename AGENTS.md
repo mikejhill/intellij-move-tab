@@ -10,7 +10,7 @@
 ## Build Toolchain
 
 * **Gradle**: 9.4.1 (via wrapper)
-* **IntelliJ Platform Gradle Plugin**: 2.13.1 (requires Gradle >= 9.0)
+* **IntelliJ Platform Gradle Plugin**: 2.14.0 (requires Gradle >= 9.0)
 * **Kotlin JVM**: 2.2.21 (must remain below 2.3.20 until CodeQL adds support for it)
 * **Java toolchain**: 21 (temurin)
 * **Target IDE**: IntelliJ IDEA 2025.3.4 (minimum supported: 2025.3 / build 253)
