@@ -5,7 +5,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.3.21"
     id("org.jetbrains.intellij.platform")
 }
 
