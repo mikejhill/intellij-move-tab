@@ -81,7 +81,7 @@ jobs:
           echo "Promoted [Unreleased] → [$VERSION] - $DATE"
 
       - name: Setup Java
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v5.3.0
         with:
           java-version: 21
           distribution: temurin
@@ -144,7 +144,7 @@ jobs:
         with:
           ref: v${{ needs.release.outputs.version }}
       - name: Setup Java
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v5.3.0
         with:
           java-version: 21
           distribution: temurin
