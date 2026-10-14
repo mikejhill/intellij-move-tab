@@ -1,6 +1,6 @@
 # AGENTS Instructions
 
-* Gradle commands are time-consuming because they download large dependencies. Avoid running any Gradle commands (such as `gradle` or `./gradlew`) in this repository.
+* Gradle commands are time-consuming because they download large dependencies (two full IDEs for testing and verification). Avoid running Gradle commands unless needed to validate a change; when you do, prefer targeted tasks (e.g. `./gradlew test`).
 * If Gradle commands are necessary, ensure the Gradle Wrapper (`./gradlew`) is always used instead of `PATH`-based Gradle (`gradle`).
 * Before pushing, lint Markdown files with `npx markdownlint-cli2 "**/*.md"`. CI enforces this via the `DavidAnson/markdownlint-cli2-action` in `verify-plugin.yml`.
 * `AGENTS.md` should be continually updated when new or helpful standards or conventions are brought up during interactions.
@@ -9,12 +9,14 @@
 
 ## Build Toolchain
 
-* **Gradle**: 9.4.1 (via wrapper)
-* **IntelliJ Platform Gradle Plugin**: 2.14.0 (requires Gradle >= 9.0)
-* **Kotlin JVM**: 2.2.21 (must remain below 2.3.20 until CodeQL adds support for it)
-* **Java toolchain**: 21 (temurin)
-* **Target IDE**: IntelliJ IDEA 2025.3.4 (minimum supported: 2025.3 / build 253)
-* **Plugin verification**: runs against 2025.3.4 only (single explicit IDE, not `recommended()`)
+* **Gradle**: 9.8.1 (via wrapper, distribution checksum pinned)
+* **IntelliJ Platform Gradle Plugin**: 2.19.0
+* **Kotlin JVM**: 2.4.20 (keep within the range CodeQL supports, currently up to 2.4.20; check the [CodeQL supported compilers](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/) page before bumping)
+* **Kotlin `apiVersion`/`languageVersion`**: 2.2, matching the stdlib bundled with the minimum supported IDE (2025.3). Raise only when `since-build` is raised.
+* **Java toolchain**: 21 (temurin); bytecode must stay at 21 while 2025.3 is supported
+* **IDE versions** (`gradle.properties`): `platformVersion` is the minimum supported IDE the plugin compiles and tests against (keep in sync with `since-build`); `platformVersionLatest` is the newest released IDE, used by `testLatestIde` and plugin verification. Bump `platformVersionLatest` when JetBrains ships a release.
+* **Plugin verification**: runs against `platformVersion` and `platformVersionLatest` (explicit IDEs, not `recommended()`)
+* **Coverage**: Kover; `check` fails below 90% line coverage across both test runs
 
 ## IntelliJ 2025.3 / IC-IU Merger
 
@@ -27,7 +29,14 @@ Starting with IntelliJ IDEA 2025.3 (build 253), Community and Ultimate editions 
 ## Kotlin Stdlib and Test Classpath
 
 * `kotlin.stdlib.default.dependency = false` in `gradle.properties` prevents the Kotlin Gradle Plugin from auto-adding the stdlib (correct — IntelliJ provides it at runtime).
-* `mockito-kotlin` transitively brings in `kotlin-reflect:2.1.20` → `kotlin-stdlib:2.1.20`. IntelliJ 2025.3+ requires `SequencesKt.sequenceOf(T)` (non-vararg, added in Kotlin 2.2.x). An explicit `testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")` in the root `build.gradle.kts` forces Gradle to resolve the conflict to 2.2.21.
+* The IntelliJ test runtime requires Kotlin 2.2+ stdlib APIs (e.g. non-vararg `SequencesKt.sequenceOf(T)`). `testImplementation(kotlin("stdlib"))` pins the test-time stdlib to the compiler version so older transitive stdlib versions cannot win.
+
+## Testing
+
+* `test` runs against `platformVersion`; `testLatestIde` (an `intellijPlatformTesting.testIde` task) runs the same tests against `platformVersionLatest`. `check` depends on both.
+* Custom `testIde` tasks must declare `testFramework(TestFrameworkType.Platform)` inside their own block; it is not inherited.
+* `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled = false` (in `gradle.properties`) is required: for IDE 2026.2+ IJPGP otherwise adds all bundled plugins to the test classpath, including the licensed Ultimate module, which fails test-application startup.
+* Keep reordering logic in `TabReorder` (pure Kotlin) and cover it with plain JUnit tests; use platform tests only for behavior that needs the IDE.
 
 ## Plugin Icon
 
@@ -49,7 +58,8 @@ This is a single-module project. All Kotlin sources live in `src/main/kotlin/` a
 
 ## Dependabot
 
-* `jackson-core` is a transitive dep supplied by IntelliJ; it cannot be updated independently. An `ignore` rule in `.github/dependabot.yml` prevents Dependabot from generating failing security-update jobs for it.
+* Dependabot alerts with manifest `settings.gradle.kts` are build-classpath dependencies of the settings plugins (mostly IJPGP), not plugin runtime dependencies. Fix them by upgrading the plugins first; if still vulnerable, add a floor in the `buildscript` block of `settings.gradle.kts` (the `jackson-bom` platform and `jsoup` constraint live there). Inspect the settings classpath with an init script using `settingsEvaluated { buildscript.configurations.getByName("classpath") ... }`; `./gradlew buildEnvironment` only shows the project classpath.
+* `ignore` rules in `.github/dependabot.yml` suppress unapplicable security-update jobs for individual transitive modules (e.g. `jackson-core`); version updates are grouped into minor/patch PRs per ecosystem.
 
 ## Versioning and Release
 
