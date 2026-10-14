@@ -40,7 +40,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(platform("com.fasterxml.jackson:jackson-bom:2.21.7"))
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.3"))
         constraints {
             classpath("org.jsoup:jsoup:1.23.2")
         }
