@@ -6,12 +6,24 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      gradle-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     ignore:
-      # These are transitive dependencies supplied by the IntelliJ platform;
-      # they cannot be updated independently and security alerts are not actionable.
+      # Transitive build-classpath dependencies of the IntelliJ Platform Gradle Plugin. They are
+      # floored via the jackson-bom platform in settings.gradle.kts (which Dependabot does update);
+      # direct security-update PRs for the individual modules cannot be applied and fail.
       - dependency-name: "com.fasterxml.jackson.core:jackson-core"
       - dependency-name: "io.undertow:undertow-core"

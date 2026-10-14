@@ -35,9 +35,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
       - name: Lint Markdown
-        uses: DavidAnson/markdownlint-cli2-action@v23.0.0
+        uses: DavidAnson/markdownlint-cli2-action@v24.2.0
         with:
           globs: '**/*.md'
 
@@ -46,21 +46,44 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v6.0.1
         with:
           java-version: 21
           distribution: temurin
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Build
+      - name: Build, test, and verify
+        # check runs unit/integration tests against both the minimum (test) and newest
+        # (testLatestIde) supported IDEs and enforces the Kover coverage floor.
         env:
           CI: true
         run: |
-          ./gradlew check verifyPlugin
+          ./gradlew check verifyPlugin koverXmlReport koverLog
+      - name: Coverage summary
+        if: always()
+        shell: bash
+        run: |
+          report=build/reports/kover/report.xml
+          [ -f "$report" ] || exit 0
+          line=$(grep -oE '<counter type="LINE" missed="[0-9]+" covered="[0-9]+"/>' "$report" | tail -1)
+          missed=$(echo "$line" | grep -oP 'missed="\K[0-9]+')
+          covered=$(echo "$line" | grep -oP 'covered="\K[0-9]+')
+          pct=$(awk "BEGIN { printf \"%.1f\", 100 * $covered / ($covered + $missed) }")
+          echo "### Line coverage: ${pct}% (${covered}/$((covered + missed)) lines)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: reports
+          path: |
+            build/reports/tests/
+            build/reports/kover/
+            build/reports/pluginVerifier/
+          if-no-files-found: ignore
       - name: Predict Next Version
         id: semrel
         shell: bash
