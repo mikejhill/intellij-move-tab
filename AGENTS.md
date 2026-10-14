@@ -59,6 +59,7 @@ This is a single-module project. All Kotlin sources live in `src/main/kotlin/` a
 ## Dependabot
 
 * Dependabot alerts with manifest `settings.gradle.kts` are build-classpath dependencies of the settings plugins (mostly IJPGP), not plugin runtime dependencies. Fix them by upgrading the plugins first; if still vulnerable, add a floor in the `buildscript` block of `settings.gradle.kts` (the `jackson-bom` platform and `jsoup` constraint live there). Inspect the settings classpath with an init script using `settingsEvaluated { buildscript.configurations.getByName("classpath") ... }`; `./gradlew buildEnvironment` only shows the project classpath.
+* Test-only libraries pulled in by the IntelliJ test framework (Jackson 2/3, OpenTelemetry) are floored by the `configurations.configureEach { resolutionStrategy.eachDependency { ... } }` block in `build.gradle.kts`, and Kover's FreeMarker by the `buildscript` constraint there. Find offenders with `./gradlew -q dependencies` (includes `intellijPlatformTest*` configurations) and `./gradlew buildEnvironment`.
 * `ignore` rules in `.github/dependabot.yml` suppress unapplicable security-update jobs for individual transitive modules (e.g. `jackson-core`); version updates are grouped into minor/patch PRs per ecosystem.
 
 ## Versioning and Release
