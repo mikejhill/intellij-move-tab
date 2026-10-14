@@ -24,35 +24,39 @@
 
 package com.mikejhill.intellij.movetab.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.fileEditor.impl.EditorWindow
 import com.intellij.openapi.project.DumbAware
-import com.intellij.ui.tabs.TabInfo
 import com.intellij.ui.tabs.impl.JBEditorTabs
+import com.mikejhill.intellij.movetab.actions.TabReorder.Direction
 import com.mikejhill.intellij.movetab.settings.MoveTabSettings
 import java.awt.Component
 
+/**
+ * Base action that moves the selected editor tab of the current editor window in a [direction].
+ */
+abstract class MoveTab(private val direction: Direction) : AnAction(), DumbAware {
 
-abstract class MoveTab : AnAction(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
-    protected fun perform(event: AnActionEvent, direction: MoveTabDirection) {
+    override fun update(event: AnActionEvent) {
+        event.presentation.isEnabled = event.project != null
+    }
+
+    override fun actionPerformed(event: AnActionEvent) {
         val manager: FileEditorManagerEx = event.project?.let { FileEditorManagerEx.getInstanceEx(it) } ?: return
         val window: EditorWindow = manager.currentWindow ?: return
-
-        // Get editor tab component
         val tabComponent: JBEditorTabs = getTabComponent(window) ?: return
+        val currentTab = tabComponent.selectedInfo ?: return
+
         val origTabList = tabComponent.tabs
-        val currentTab = tabComponent.selectedInfo
-
-        // Guard-clause: Stop if no tab selected
-        if (currentTab == null) {
-            return
-        }
-
-        // Get tab movement instructions
-        val newTabList = getNewTabList(origTabList, currentTab, direction)
+        val origIndex = origTabList.indexOf(currentTab)
+        val newIndex = TabReorder.targetIndex(origTabList.size, origIndex, direction, MoveTabSettings.wrapAround)
+        if (newIndex == origIndex) return
+        val newTabList = TabReorder.move(origTabList, origIndex, newIndex)
 
         // To avoid effects from the current tab being removed and recreated, move other tabs instead
         val movedTabList =
@@ -64,40 +68,8 @@ abstract class MoveTab : AnAction(), DumbAware {
     }
 
     private fun getTabComponent(window: EditorWindow): JBEditorTabs? {
-        return window.selectedComposite?.component?.let {
-            var cmp: Component? = it
-            while (cmp != null && cmp !is JBEditorTabs) cmp = cmp.parent
-            cmp
-        } as JBEditorTabs?
+        var cmp: Component? = window.selectedComposite?.component
+        while (cmp != null && cmp !is JBEditorTabs) cmp = cmp.parent
+        return cmp as JBEditorTabs?
     }
-
-
-    private fun getNewTabList(
-        origTabList: List<TabInfo>,
-        currentTab: TabInfo,
-        direction: MoveTabDirection
-    ): List<TabInfo> {
-        val origIndex = origTabList.indexOf(currentTab)
-        val lastIndex = origTabList.lastIndex
-
-        val newIndex = when (direction) {
-            MoveTabDirection.LEFT -> when {
-                origIndex == 0 -> if (MoveTabSettings.wrapAround) lastIndex else origIndex
-                else -> origIndex - 1
-            }
-            MoveTabDirection.RIGHT -> when {
-                origIndex == lastIndex -> if (MoveTabSettings.wrapAround) 0 else origIndex
-                else -> origIndex + 1
-            }
-            MoveTabDirection.START -> 0
-            MoveTabDirection.END -> lastIndex
-        }
-
-        return origTabList.toMutableList()
-            .apply { removeAt(origIndex) }
-            .apply { add(newIndex, currentTab) }
-            .toList()
-    }
-
-    enum class MoveTabDirection { LEFT, RIGHT, START, END }
 }
