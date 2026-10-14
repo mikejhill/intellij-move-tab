@@ -127,7 +127,7 @@ tag.
    changelog, runs the full build and test suite, then pushes a `vX.Y.Z` tag and
    creates a GitHub Release with the plugin artifact attached. Because `master`
    is protected, it syncs the changelog back through a `release/vX.Y.Z` pull
-   request that it verifies and merges itself. A separate environment-gated job
+   request that you merge (approve its CI run first). A separate environment-gated job
    publishes the plugin to the
    [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13087-movetab).
    If a release fails after its tag is pushed, re-run the workflow with the
