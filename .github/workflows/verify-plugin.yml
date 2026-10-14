@@ -10,8 +10,6 @@ on:
   pull_request:
     branches: ['*']
   merge_group:
-  # Dispatched by the release workflow for its changelog-sync PR (GITHUB_TOKEN pushes trigger nothing).
-  workflow_dispatch:
 
 permissions:
   contents: read

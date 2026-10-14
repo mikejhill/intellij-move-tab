@@ -21,8 +21,8 @@ concurrency:
   cancel-in-progress: false
 
 # master is protected (pull request + ci-pass required), so this workflow never pushes to it directly.
-# It pushes only the release tag, then syncs the promoted CHANGELOG back to master through a pull
-# request that it verifies (by dispatching the CI workflow) and merges.
+# It pushes only the release tag, then opens a release/vX.Y.Z pull request that syncs the promoted
+# CHANGELOG back to master. A maintainer merges that PR (bot-opened PRs need their CI run approved).
 jobs:
   release:
     if: github.ref == 'refs/heads/master'
@@ -32,7 +32,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write
       attestations: write
       artifact-metadata: write
       id-token: write
@@ -91,8 +90,16 @@ jobs:
 
       - name: Validate CHANGELOG
         if: inputs.resume-tag == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
+          pending=$(gh pr list --base master --state open --json headRefName,url \
+            --jq '[.[] | select(.headRefName | startswith("release/v")) | .url] | join(" ")')
+          if [ -n "$pending" ]; then
+            echo "::error::Merge the pending changelog-sync PR(s) first: $pending"
+            exit 1
+          fi
           grep -q "^## \[Unreleased\]" CHANGELOG.md || {
             echo "::error::CHANGELOG.md missing [Unreleased] section"
             exit 1
@@ -187,27 +194,18 @@ jobs:
           }
           git commit -q -am "chore(release): v$VERSION"
           git push --force origin "$branch"
-          sha=$(git rev-parse HEAD)
           pr_url=$(gh pr list --head "$branch" --base master --state open --json url --jq '.[0].url')
           if [ -z "$pr_url" ]; then
             pr_url=$(gh pr create --base master --head "$branch" \
               --title "chore(release): v$VERSION" \
-              --body "Syncs the CHANGELOG promotion for v$VERSION back to master. Created and merged by the release workflow.")
+              --body "Syncs the CHANGELOG promotion for v$VERSION back to master. Opened by the release workflow; approve its workflow run (or close and reopen this PR) and merge it before the next release.")
           fi
-          # Pushes and pull requests made with GITHUB_TOKEN do not trigger workflows, so dispatch CI
-          # explicitly; its ci-pass check on the branch head satisfies branch protection.
-          gh workflow run verify-plugin.yml --ref "$branch"
-          run_id=""
-          for _ in $(seq 1 30); do
-            run_id=$(gh run list --workflow verify-plugin.yml --branch "$branch" --event workflow_dispatch \
-              --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-            [ -n "$run_id" ] && break
-            sleep 10
-          done
-          [ -n "$run_id" ] || { echo "::error::CI run for $branch did not start"; exit 1; }
-          gh run watch "$run_id" --exit-status --interval 30
-          gh pr merge "$pr_url" --rebase --delete-branch
-          echo "Changelog synced to master via $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Action required: merge $pr_url"
+            echo ""
+            echo "Bot-opened PRs need a maintainer to approve their CI run (or close and reopen the PR) before \`ci-pass\` can satisfy branch protection."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Merge $pr_url to sync the v$VERSION CHANGELOG to master"
 
   publish:
     needs: release
