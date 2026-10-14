@@ -34,7 +34,7 @@ pluginManagement {
 // Security floors for transitive build-classpath dependencies of the settings plugins
 // (primarily the IntelliJ Platform Gradle Plugin). These never ship in the plugin artifact,
 // but Dependabot reports them via the dependency graph. Remove each floor once the upstream
-// plugin depends on a patched version on its own (check with `./gradlew buildEnvironment`).
+// plugin depends on a patched version on its own (see "Dependabot" in AGENTS.md for how to check).
 buildscript {
     repositories {
         mavenCentral()
