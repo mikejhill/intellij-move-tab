@@ -31,11 +31,27 @@ pluginManagement {
     }
 }
 
+// Security floors for transitive build-classpath dependencies of the settings plugins
+// (primarily the IntelliJ Platform Gradle Plugin). These never ship in the plugin artifact,
+// but Dependabot reports them via the dependency graph. Remove each floor once the upstream
+// plugin depends on a patched version on its own (check with `./gradlew buildEnvironment`).
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.21.7"))
+        constraints {
+            classpath("org.jsoup:jsoup:1.23.2")
+        }
+    }
+}
+
 plugins {
-    id("com.gradle.develocity") version "4.4.0"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("com.gradle.develocity") version "4.6.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("org.jetbrains.intellij.platform.settings") version "2.14.0"
+    id("org.jetbrains.intellij.platform.settings") version "2.19.0"
 }
 
 rootProject.name = "intellij-move-tab"
