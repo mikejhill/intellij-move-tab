@@ -11,7 +11,7 @@
 
 * **Gradle**: 9.8.1 (via wrapper, distribution checksum pinned)
 * **IntelliJ Platform Gradle Plugin**: 2.19.0
-* **Kotlin JVM**: 2.4.20 (keep within the range CodeQL supports, currently up to 2.4.20; check the [CodeQL supported compilers](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/) page before bumping)
+* **Kotlin JVM**: 2.4.21 (keep within the range CodeQL supports — 2.4.21 is verified by the CodeQL workflow; check the [CodeQL supported compilers](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/) page before bumping)
 * **Kotlin `apiVersion`/`languageVersion`**: 2.2, matching the stdlib bundled with the minimum supported IDE (2025.3). Raise only when `since-build` is raised.
 * **Java toolchain**: 21 (temurin); bytecode must stay at 21 while 2025.3 is supported
 * **IDE versions** (`gradle.properties`): `platformVersion` is the minimum supported IDE the plugin compiles and tests against (keep in sync with `since-build`); `platformVersionLatest` is the newest released IDE, used by `testLatestIde` and plugin verification. Bump `platformVersionLatest` when JetBrains ships a release.
