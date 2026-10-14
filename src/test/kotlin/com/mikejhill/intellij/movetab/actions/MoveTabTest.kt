@@ -24,15 +24,12 @@
 
 package com.mikejhill.intellij.movetab.actions
 
-import com.intellij.ide.DataManager
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.ActionUiKind
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
-import com.intellij.openapi.actionSystem.ex.ActionManagerEx
-import com.intellij.openapi.actionSystem.ex.ActionUtil
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl
@@ -106,20 +103,22 @@ class MoveTabTest : HeavyPlatformTestCase() {
             .toIntArray()
     }
 
+    private fun createEvent(withProject: Boolean = true): AnActionEvent {
+        val dataContext = if (withProject) SimpleDataContext.getProjectContext(project) else SimpleDataContext.EMPTY_CONTEXT
+        return AnActionEvent.createEvent(dataContext, Presentation(), ActionPlaces.EDITOR_TAB, ActionUiKind.NONE, null)
+    }
+
     private fun invokeAction(actionName: String) {
-        @Suppress("DEPRECATION")
-        val dataContext = ApplicationManager.getApplication()!!.service<DataManager>().dataContext
-        val actionEvent = AnActionEvent(
-            dataContext,
-            Presentation(),
-            ActionPlaces.EDITOR_TAB,
-            ActionUiKind.NONE,
-            null,
-            0,
-            ActionManagerEx.getInstanceEx()
-        )
-        val action = ActionManagerEx.getInstanceEx().getAction(actionName)
-        ActionUtil.invokeAction(action, actionEvent, null)
+        val action = ActionManager.getInstance().getAction(actionName)
+        val event = createEvent()
+        action.update(event)
+        assertTrue("$actionName should be enabled when a project is available", event.presentation.isEnabled)
+        action.actionPerformed(event)
+    }
+
+    private fun selectedFileNumber(): Int {
+        val file = FileEditorManagerEx.getInstanceEx(project).currentWindow!!.selectedFile!!
+        return Regex("""\d+""").find(file.name)!!.value.toInt()
     }
 
 
@@ -440,5 +439,71 @@ class MoveTabTest : HeavyPlatformTestCase() {
         selectFile(5)
         invokeAction(ACTION_MOVE_RIGHT)
         assertOrderedEquals(getFileOrder(), intArrayOf(5, 1, 2, 3, 4))
+    }
+
+
+    /* ********************************************************************** */
+    /* Selection, enablement, and edge cases                                   */
+    /* ********************************************************************** */
+
+
+    @Test
+    fun moved_tab_stays_selected() {
+        openFiles(5)
+        selectFile(2)
+        listOf(ACTION_MOVE_RIGHT, ACTION_MOVE_RIGHT, ACTION_MOVE_TO_START, ACTION_MOVE_LEFT, ACTION_MOVE_TO_END).forEach {
+            invokeAction(it)
+            assertEquals("selected tab after $it", 2, selectedFileNumber())
+        }
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 3, 4, 5, 2))
+    }
+
+    @Test
+    fun moving_does_not_close_or_duplicate_tabs() {
+        openFiles(6)
+        selectFile(4)
+        repeat(13) { invokeAction(if (it % 3 == 0) ACTION_MOVE_LEFT else ACTION_MOVE_RIGHT) }
+        assertOrderedEquals(getFileOrder().sorted(), listOf(1, 2, 3, 4, 5, 6))
+        assertEquals(6, FileEditorManager.getInstance(project).openFiles.size)
+    }
+
+    @Test
+    fun actions_disabled_without_project() {
+        listOf(ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_TO_START, ACTION_MOVE_TO_END).forEach {
+            val event = createEvent(withProject = false)
+            ActionManager.getInstance().getAction(it).update(event)
+            assertFalse("$it should be disabled without a project", event.presentation.isEnabled)
+        }
+    }
+
+    @Test
+    fun action_without_project_is_a_no_op() {
+        openFiles(3)
+        selectFile(1)
+        ActionManager.getInstance().getAction(ACTION_MOVE_RIGHT).actionPerformed(createEvent(withProject = false))
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 3))
+    }
+
+    @Test
+    fun no_wrap_two_tabs_at_edges() {
+        MoveTabSettings.wrapAround = false
+        openFiles(2)
+        selectFile(1)
+        invokeAction(ACTION_MOVE_LEFT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2))
+        selectFile(2)
+        invokeAction(ACTION_MOVE_RIGHT)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2))
+    }
+
+    @Test
+    fun move_to_start_and_end_ignore_wrap_setting() {
+        MoveTabSettings.wrapAround = false
+        openFiles(4)
+        selectFile(3)
+        invokeAction(ACTION_MOVE_TO_START)
+        assertOrderedEquals(getFileOrder(), intArrayOf(3, 1, 2, 4))
+        invokeAction(ACTION_MOVE_TO_END)
+        assertOrderedEquals(getFileOrder(), intArrayOf(1, 2, 4, 3))
     }
 }
