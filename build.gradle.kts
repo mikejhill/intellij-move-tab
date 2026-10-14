@@ -3,6 +3,15 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
+// Security floor for Kover's transitive FreeMarker (build classpath only; never bundled).
+buildscript {
+    dependencies {
+        constraints {
+            classpath("org.freemarker:freemarker:2.3.35")
+        }
+    }
+}
+
 plugins {
     id("java")
     kotlin("jvm") version "2.4.20"
@@ -83,6 +92,26 @@ kover {
                     minBound(90)
                 }
             }
+        }
+    }
+}
+
+// Security floors for libraries the IntelliJ test framework pulls in transitively. They exist only on
+// test classpaths (the plugin bundles no third-party code) but are reported by Dependabot. Raise or
+// remove each floor once the test framework for both platformVersion and platformVersionLatest ships
+// patched versions on its own.
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        val floor = when {
+            requested.group == "com.fasterxml.jackson.core" && requested.name != "jackson-annotations" -> "2.21.7"
+            requested.group.startsWith("tools.jackson") -> "3.1.7"
+            requested.group == "io.opentelemetry" -> "1.67.0"
+            else -> null
+        }
+        val version = requested.version
+        if (floor != null && version != null && isOlder(version, floor)) {
+            useVersion(floor)
+            because("security floor for a transitive test/build dependency")
         }
     }
 }
@@ -196,4 +225,18 @@ fun markdownLineToHtml(text: String): String {
         .replace(">", "&gt;")
         .replace(Regex("\\*\\*(.+?)\\*\\*"), "<b>$1</b>")
         .replace(Regex("\\[(.+?)]\\((.+?)\\)"), "<a href=\"$2\">$1</a>")
+}
+
+/** Returns true if [version] is older than [floor] within the same major line (numeric segments only). */
+fun isOlder(version: String, floor: String): Boolean {
+    fun parts(v: String) = v.split('.', '-').map { it.toIntOrNull() ?: 0 }
+    val a = parts(version)
+    val b = parts(floor)
+    if (a.first() != b.first()) return false
+    for (i in 0 until maxOf(a.size, b.size)) {
+        val x = a.getOrElse(i) { 0 }
+        val y = b.getOrElse(i) { 0 }
+        if (x != y) return x < y
+    }
+    return false
 }
