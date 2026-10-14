@@ -24,6 +24,7 @@
 
 package com.mikejhill.intellij.movetab.settings
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.testFramework.LightPlatformTestCase
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,5 +64,17 @@ class MoveTabSettingsTest : LightPlatformTestCase() {
         MoveTabSettings.wrapAround = true
         assertTrue(MoveTabSettings.wrapAround)
         assertTrue(MoveTabSettings.wrapAround)
+    }
+
+    @Test
+    fun wrap_around_uses_stable_storage_key() {
+        // Existing users' preferences are stored under this key; renaming it would silently reset them.
+        val properties = PropertiesComponent.getInstance()
+        val key = "com.mikejhill.intellij.movetab.wrapAround"
+        MoveTabSettings.wrapAround = false
+        assertEquals("false", properties.getValue(key))
+        // The default (true) is stored by removing the key.
+        MoveTabSettings.wrapAround = true
+        assertFalse(properties.isValueSet(key))
     }
 }
