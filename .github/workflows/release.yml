@@ -173,9 +173,21 @@ jobs:
             echo "master already contains the [$VERSION] changelog section."
             exit 0
           fi
+          # Re-apply the promotion on top of current master (rather than pushing the tagged commit) so
+          # the branch carries master's latest workflows and any [Unreleased] entries added since.
           branch="release/v$VERSION"
-          sha=$(git rev-list -n 1 "v$VERSION")
-          git push --force origin "$sha:refs/heads/$branch"
+          date=$(git show "v$VERSION:CHANGELOG.md" | grep -oP "^## \[$VERSION\] - \K[0-9-]+")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -q -B "$branch" origin/master
+          sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [$VERSION] - $date/" CHANGELOG.md
+          grep -q "^## \[$VERSION\] - $date" CHANGELOG.md || {
+            echo "::error::Could not promote CHANGELOG on master for $VERSION"
+            exit 1
+          }
+          git commit -q -am "chore(release): v$VERSION"
+          git push --force origin "$branch"
+          sha=$(git rev-parse HEAD)
           pr_url=$(gh pr list --head "$branch" --base master --state open --json url --jq '.[0].url')
           if [ -z "$pr_url" ]; then
             pr_url=$(gh pr create --base master --head "$branch" \
