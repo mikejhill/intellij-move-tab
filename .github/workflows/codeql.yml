@@ -17,7 +17,7 @@ jobs:
   analyze:
     name: Analyze (java-kotlin)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       security-events: write
       actions: read
@@ -41,8 +41,10 @@ jobs:
       - name: Build
         env:
           CI: true
+        # The CodeQL Kotlin extractor runs inside the Kotlin daemon and needs far more heap than a
+        # normal compile (it exhausts the default heap with the IntelliJ classpath).
         run: |
-          ./gradlew :assemble
+          ./gradlew :assemble -Pkotlin.daemon.jvmargs=-Xmx8g
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.38.3
         with:
