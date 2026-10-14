@@ -15,10 +15,13 @@ panel. It has no external runtime dependencies beyond the IntelliJ Platform SDK.
 
 All tab movement logic is encapsulated in a small action hierarchy:
 
-- **`MoveTab`** — Abstract base class extending `AnAction`. Contains the core
-  tab-reordering algorithm: it locates the active editor tab within its
-  `EditorWindow`, computes the target index based on direction and wrap-around
-  settings, and calls the platform API to move the tab.
+- **`MoveTab`** — Abstract base class extending `AnAction`. It locates the
+  active editor tab within its `EditorWindow`, asks `TabReorder` for the target
+  index, and reorders the `JBEditorTabs` component. The action is enabled only
+  when a project is available and updates on a background thread (`BGT`).
+- **`TabReorder`** — Pure, UI-independent reordering rules (target index for a
+  direction and wrap-around setting, plus list reordering). Kept free of
+  platform types so it can be unit tested exhaustively without an IDE.
 - **`MoveTabLeft`** / **`MoveTabRight`** — Concrete actions that move the active
   tab one position left or right. These are the primary actions with default
   keyboard shortcuts.
@@ -26,17 +29,17 @@ All tab movement logic is encapsulated in a small action hierarchy:
   active tab to the first or last position. These have no default shortcuts and
   must be assigned by the user.
 
-Each action overrides `actionPerformed` and delegates to `MoveTab` with a
-direction parameter. The actions are registered in `plugin.xml` under the
-`EditorTabActionGroup`.
+Each concrete action only passes its direction to the `MoveTab` constructor.
+The actions are registered in `plugin.xml` (not added to any menu group) and
+are invoked through keyboard shortcuts.
 
 ### Settings (`src/main/kotlin/.../settings/`)
 
 - **`MoveTabSettings`** — Singleton that persists user preferences via
   `PropertiesComponent`. Currently exposes a single setting: whether Move Tab
   Left/Right should wrap around at the edges of the tab bar.
-- **`MoveTabConfigurable`** — Implements `Configurable` to provide a settings UI
-  panel at **Settings > Editor > Move Tab**.
+- **`MoveTabConfigurable`** — A `BoundConfigurable` built with the Kotlin UI
+  DSL that provides the settings page at **Settings > Editor > Move Tab**.
 
 ### Plugin Descriptor (`src/main/resources/META-INF/plugin.xml`)
 
@@ -68,13 +71,30 @@ Key build details:
   build time. The `[Unreleased]` section is skipped; only released versions
   appear in the plugin.
 
+## Testing
+
+Tests run twice: `test` targets the minimum supported IDE (`platformVersion`)
+and `testLatestIde` targets the newest release (`platformVersionLatest`); both
+are wired into `check`. Kover measures coverage across both runs and `check`
+fails if line coverage drops below 90%.
+
+- **Unit** — `TabReorderTest` checks every tab-bar size up to 8, every position,
+  direction, and wrap setting against an independent reference model, plus
+  invariants (no tabs lost, relative order preserved, full-cycle identity).
+- **Integration** — `MoveTabTest` opens real editors via `FileEditorManagerImpl`
+  and invokes the registered actions, asserting tab order and selection.
+- **Settings** — `MoveTabSettingsTest` and `MoveTabConfigurableTest` cover
+  persistence, the stable storage key, and the settings page bindings.
+- **Descriptor** — `PluginDescriptorTest` asserts action IDs, texts, default
+  shortcuts, and that the running IDE satisfies `since-build`.
+
 ## CI/CD Pipeline
 
 Three GitHub Actions workflows automate the development lifecycle:
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| **Build and Verify Plugin** | Push, PR, merge group | Lint markdown, validate PR titles, build, test, verify plugin, predict next version |
+| **Build and Verify Plugin** | Push, PR, merge group | Lint markdown, validate PR titles, build, test on minimum and latest IDEs, coverage, verify plugin, predict next version |
 | **Release and Publish** | Manual (`workflow_dispatch`) | Determines version (dry-run), validates build, creates tag, GitHub Release, publishes to JetBrains Marketplace |
 | **CodeQL Analysis** | Push, PR, weekly schedule | Static security analysis for Java/Kotlin |
 

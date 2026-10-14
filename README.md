@@ -48,7 +48,7 @@ Wrap-around behavior for Move Tab Left/Right is configurable via
 ### Prerequisites
 
 - **Java 21** (Eclipse Temurin recommended)
-- **Gradle 9.4+** is provided via the Gradle Wrapper — always use `./gradlew`
+- **Gradle 9.8+** is provided via the Gradle Wrapper — always use `./gradlew`
   (or `gradlew.bat` on Windows)
 
 ### Build and Verify
@@ -57,8 +57,28 @@ Wrap-around behavior for Move Tab Left/Right is configurable via
 ./gradlew check verifyPlugin
 ```
 
-This compiles the plugin, runs unit tests, and verifies the plugin descriptor
-against IntelliJ IDEA 2025.3.4.
+This compiles the plugin, runs the full test suite against both the minimum
+supported IDE (IntelliJ IDEA 2025.3) and the newest release (2026.2), enforces
+a code-coverage floor with [Kover](https://github.com/Kotlin/kotlinx-kover), and
+runs the IntelliJ Plugin Verifier against both IDEs. IDE versions are set in
+`gradle.properties` (`platformVersion` and `platformVersionLatest`).
+
+### Testing
+
+| Layer | Location | What it covers |
+| --- | --- | --- |
+| Pure unit tests | `actions/TabReorderTest` | Exhaustive reordering rules for every size, position, direction, and wrap setting; no IDE needed |
+| IDE integration tests | `actions/MoveTabTest` | Real editor tabs moved through the registered actions (`HeavyPlatformTestCase`) |
+| Settings tests | `settings/*Test` | Persistence, storage-key stability, and the settings page bindings |
+| Descriptor tests | `PluginDescriptorTest` | Action IDs, texts, default shortcuts, and settings registration from `plugin.xml` |
+
+Useful tasks:
+
+```shell
+./gradlew test             # tests against the minimum supported IDE
+./gradlew testLatestIde    # the same tests against the newest IDE release
+./gradlew koverHtmlReport  # coverage report in build/reports/kover/html
+```
 
 ### Project Structure
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Verified and tested with IntelliJ IDEA 2026.2 (2025.3 and later remain supported).
+- Move Tab actions are now disabled when no project is open and use the background action-update thread.
+- The settings page is now built with the Kotlin UI DSL.
+
+### Security
+
+- Updated build tooling (Gradle 9.8.1, IntelliJ Platform Gradle Plugin 2.19.0, Kotlin 2.4.20) and patched vulnerable build-time dependencies (Jackson, jsoup, Bouncy Castle, OpenTelemetry). The plugin itself bundles no third-party dependencies.
+
 ## [2.2.0] - 2026-03-29
 
 ### Added
