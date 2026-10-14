@@ -10,6 +10,8 @@ on:
   pull_request:
     branches: ['*']
   merge_group:
+  # Dispatched by the release workflow for its changelog-sync PR (GITHUB_TOKEN pushes trigger nothing).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -90,7 +92,7 @@ jobs:
         run: |
           curl -L -o semrel https://registry.go-semantic-release.xyz/downloads/linux/amd64/semantic-release
           chmod +x semrel
-          ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes --no-ci 2>&1 | tee semrel.log
+          ./semrel --version-file --changelog .generated-go-semantic-release-changelog.md --token ${{ secrets.GITHUB_TOKEN }} --dry --allow-no-changes --no-ci --provider-opt github_use_compare_commits=true 2>&1 | tee semrel.log
           # In --dry mode, semrel logs the version but may not write .version-unreleased.
           # Try the file first, then fall back to parsing the log.
           if [ -f .version-unreleased ]; then

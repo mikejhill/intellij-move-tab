@@ -124,10 +124,14 @@ tag.
    via GitHub Actions. Use the **dry-run** option to validate the full pipeline
    without creating tags or publishing.
 4. The workflow determines the next version, promotes `[Unreleased]` in the
-   changelog, runs the full build and test suite, commits the changelog update,
-   then creates a `vX.Y.Z` tag and GitHub Release with the plugin artifact
-   attached. A separate environment-gated job publishes the plugin to the
+   changelog, runs the full build and test suite, then pushes a `vX.Y.Z` tag and
+   creates a GitHub Release with the plugin artifact attached. Because `master`
+   is protected, it syncs the changelog back through a `release/vX.Y.Z` pull
+   request that it verifies and merges itself. A separate environment-gated job
+   publishes the plugin to the
    [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13087-movetab).
+   If a release fails after its tag is pushed, re-run the workflow with the
+   **resume-tag** input (e.g. `v2.3.0`) to finish it.
 
 > **Note:** The release workflow validates the build **before** creating any tags.
 > If the build fails, no tag or release is created. `CHANGELOG.md` is

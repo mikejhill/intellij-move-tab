@@ -11,19 +11,28 @@ on:
         description: 'Force a patch bump when no releasable commits exist'
         type: boolean
         default: false
+      resume-tag:
+        description: 'Finish a release whose tag already exists (e.g. v2.3.0): build, GitHub Release, changelog sync, publish'
+        type: string
+        default: ''
 
 concurrency:
   group: release
   cancel-in-progress: false
 
+# master is protected (pull request + ci-pass required), so this workflow never pushes to it directly.
+# It pushes only the release tag, then syncs the promoted CHANGELOG back to master through a pull
+# request that it verifies (by dispatching the CI workflow) and merges.
 jobs:
   release:
     if: github.ref == 'refs/heads/master'
     name: Release
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
+      pull-requests: write
+      actions: write
       attestations: write
       artifact-metadata: write
       id-token: write
@@ -36,6 +45,7 @@ jobs:
           fetch-depth: 0
 
       - name: Determine next version
+        if: inputs.resume-tag == ''
         id: semrel
         uses: go-semantic-release/action@v1.24.1
         with:
@@ -43,23 +53,44 @@ jobs:
           allow-initial-development-versions: true
           force-bump-patch-version: ${{ inputs.force-patch }}
           dry: true
+          # Release tags are not on master's first-parent history (the changelog commit reaches master
+          # via a rebase-merged PR), so count commits with the compare API instead of walking history.
+          custom-arguments: --provider-opt github_use_compare_commits=true
 
-      - name: Require version bump
+      - name: Resolve version
         id: version
+        env:
+          RESUME_TAG: ${{ inputs.resume-tag }}
+          SEMREL_VERSION: ${{ steps.semrel.outputs.version }}
         shell: bash
         run: |
-          version="${{ steps.semrel.outputs.version }}"
-          if [ -z "$version" ] && [ -f .version-unreleased ]; then
-            version=$(cat .version-unreleased)
+          if [ -n "$RESUME_TAG" ]; then
+            version="${RESUME_TAG#v}"
+            git rev-parse -q --verify "refs/tags/v$version" > /dev/null || {
+              echo "::error::Tag v$version does not exist"
+              exit 1
+            }
+            # Build exactly what was tagged.
+            git checkout -q "v$version"
+          else
+            version="$SEMREL_VERSION"
+            if [ -z "$version" ] && [ -f .version-unreleased ]; then
+              version=$(cat .version-unreleased)
+            fi
+            if [ -z "$version" ]; then
+              echo "::error::No releasable commits found. Use force-patch or add feat:/fix: commits."
+              exit 1
+            fi
           fi
-          if [ -z "$version" ]; then
-            echo "::error::No releasable commits found. Use force-patch or add feat:/fix: commits."
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Invalid version '$version'"
             exit 1
-          fi
+          }
           echo "value=$version" >> "$GITHUB_OUTPUT"
           echo "### Release Version: $version" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate CHANGELOG
+        if: inputs.resume-tag == ''
         shell: bash
         run: |
           grep -q "^## \[Unreleased\]" CHANGELOG.md || {
@@ -68,6 +99,7 @@ jobs:
           }
 
       - name: Promote CHANGELOG
+        if: inputs.resume-tag == ''
         env:
           VERSION: ${{ steps.version.outputs.value }}
         shell: bash
@@ -102,8 +134,8 @@ jobs:
           echo "Version **${{ steps.version.outputs.value }}** validated successfully." >> "$GITHUB_STEP_SUMMARY"
           echo "No tags, releases, or artifacts were created." >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit CHANGELOG and create tag
-        if: inputs.dry-run != true
+      - name: Commit CHANGELOG and push tag
+        if: inputs.dry-run != true && inputs.resume-tag == ''
         env:
           VERSION: ${{ steps.version.outputs.value }}
         run: |
@@ -112,7 +144,7 @@ jobs:
           git add CHANGELOG.md
           git commit -m "chore(release): v$VERSION"
           git tag "v$VERSION"
-          git push origin HEAD "v$VERSION"
+          git push origin "v$VERSION"
 
       - name: Create GitHub Release
         if: inputs.dry-run != true
@@ -128,6 +160,42 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: build/distributions/*.zip
+
+      - name: Sync CHANGELOG to master
+        if: inputs.dry-run != true
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          git fetch -q origin master
+          if git show origin/master:CHANGELOG.md | grep -q "^## \[$VERSION\]"; then
+            echo "master already contains the [$VERSION] changelog section."
+            exit 0
+          fi
+          branch="release/v$VERSION"
+          sha=$(git rev-list -n 1 "v$VERSION")
+          git push --force origin "$sha:refs/heads/$branch"
+          pr_url=$(gh pr list --head "$branch" --base master --state open --json url --jq '.[0].url')
+          if [ -z "$pr_url" ]; then
+            pr_url=$(gh pr create --base master --head "$branch" \
+              --title "chore(release): v$VERSION" \
+              --body "Syncs the CHANGELOG promotion for v$VERSION back to master. Created and merged by the release workflow.")
+          fi
+          # Pushes and pull requests made with GITHUB_TOKEN do not trigger workflows, so dispatch CI
+          # explicitly; its ci-pass check on the branch head satisfies branch protection.
+          gh workflow run verify-plugin.yml --ref "$branch"
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id=$(gh run list --workflow verify-plugin.yml --branch "$branch" --event workflow_dispatch \
+              --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+            [ -n "$run_id" ] && break
+            sleep 10
+          done
+          [ -n "$run_id" ] || { echo "::error::CI run for $branch did not start"; exit 1; }
+          gh run watch "$run_id" --exit-status --interval 30
+          gh pr merge "$pr_url" --rebase --delete-branch
+          echo "Changelog synced to master via $pr_url" >> "$GITHUB_STEP_SUMMARY"
 
   publish:
     needs: release
@@ -154,4 +222,3 @@ jobs:
         env:
           publishToken: ${{ secrets.JETBRAINS_HUB_TOKEN }}
         run: ./gradlew publishPlugin -PpluginVersion=${{ needs.release.outputs.version }}
-
