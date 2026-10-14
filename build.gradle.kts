@@ -1,13 +1,19 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.4.20"
     id("org.jetbrains.intellij.platform")
+    id("org.jetbrains.kotlinx.kover") version "0.9.11"
 }
+
+// Minimum supported IDE (matches since-build in plugin.xml); the plugin compiles against it.
+val platformVersion = providers.gradleProperty("platformVersion").get()
+// Newest released IDE; tests and verification also run against it.
+val platformVersionLatest = providers.gradleProperty("platformVersionLatest").get()
 
 // Version is set by the publish workflow from the git tag (e.g. -PpluginVersion=2.2.0).
 // Local/CI builds use a dev placeholder; the real version is determined by go-semantic-release.
@@ -21,10 +27,12 @@ java {
 
 kotlin {
     jvmToolchain(21)
-}
-
-val publishPlugin by tasks.existing(PublishPluginTask::class) {
-    token.set(getPropertyValue("publishToken"))
+    compilerOptions {
+        // Restrict stdlib API usage to what the minimum supported IDE (2025.3) bundles.
+        // The plugin runs against the IDE-provided Kotlin stdlib, never its own copy.
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
+    }
 }
 
 tasks.withType<RunIdeTask> {
@@ -35,11 +43,16 @@ intellijPlatform {
     pluginConfiguration {
         changeNotes = project.provider { changelogToHtml() }
     }
+    publishing {
+        // Supplied by the release workflow as an environment variable (or locally via -PpublishToken).
+        token = providers.gradleProperty("publishToken").orElse(providers.environmentVariable("publishToken"))
+    }
     pluginVerification {
         ides {
-            // Verify against only the IDE version used to build. Using recommended() downloads
-            // multiple IDEs across the compatibility range, making CI significantly slower.
-            create(IntelliJPlatformType.IntellijIdea, "2025.3.4")
+            // Verify against both ends of the supported range: the minimum IDE the plugin builds
+            // against and the newest release. recommended() would download many more IDEs.
+            create(IntelliJPlatformType.IntellijIdea, platformVersion)
+            create(IntelliJPlatformType.IntellijIdea, platformVersionLatest)
         }
         // The plugin ID predates the JetBrains rule against 'intellij' in plugin IDs.
         // This mutes the check so existing marketplace listings are not broken.
@@ -47,9 +60,39 @@ intellijPlatform {
     }
 }
 
+// Runs the full test suite against the newest released IDE, in addition to `test`
+// (which runs against the minimum supported IDE).
+intellijPlatformTesting {
+    testIde {
+        register("testLatestIde") {
+            type = IntelliJPlatformType.IntellijIdea
+            version = platformVersionLatest
+            testFramework(TestFrameworkType.Platform)
+            task {
+                useJUnit()
+            }
+        }
+    }
+}
+
+kover {
+    reports {
+        total {
+            verify {
+                rule {
+                    minBound(90)
+                }
+            }
+        }
+    }
+}
+
 tasks {
     withType<Test> {
         useJUnit()
+    }
+    check {
+        dependsOn("testLatestIde")
     }
     // Searchable options index is disabled; the settings UI is simple enough that indexing adds no value.
     buildSearchableOptions {
@@ -70,15 +113,14 @@ tasks {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("2025.3.4")
+        intellijIdea(platformVersion)
         testFramework(TestFrameworkType.Platform)
     }
-    // Force Kotlin stdlib to 2.2.21+: IntelliJ 2025.3 requires APIs added in Kotlin 2.2.x.
-    // mockito-kotlin transitively brings in kotlin-stdlib:2.1.20 which lacks them.
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    // Pin the test-time Kotlin stdlib to the compiler version: the IntelliJ test runtime requires
+    // Kotlin 2.2+ APIs, while test libraries can transitively pull in older stdlib versions.
+    testImplementation(kotlin("stdlib"))
     // Workaround IJPL-157292: TestFrameworkType.Platform no longer provides opentest4j transitively.
     testImplementation("org.opentest4j:opentest4j:1.3.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     testImplementation("junit:junit:4.13.2")
 }
 
@@ -96,10 +138,6 @@ tasks.register("resolveDependencies") {
 
 
 /* Utility functions */
-
-fun getPropertyValue(name: String): String? {
-    return if (project.extra.has(name)) project.extra[name]?.toString() else System.getenv(name)
-}
 
 /**
  * Converts CHANGELOG.md (Keep a Changelog format) to an HTML fragment for
