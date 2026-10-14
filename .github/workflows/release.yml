@@ -153,13 +153,29 @@ jobs:
           git tag "v$VERSION"
           git push origin "v$VERSION"
 
+      - name: Check for existing GitHub Release
+        if: inputs.dry-run != true
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub Release
         if: inputs.dry-run != true
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.version.outputs.value }}
           name: v${{ steps.version.outputs.value }}
-          generate_release_notes: true
+          # Generate notes only on first creation: when updating an existing release (resume-tag or a
+          # re-run), the action appends freshly generated notes to the body, duplicating it.
+          generate_release_notes: ${{ steps.existing.outputs.exists != 'true' }}
           files: build/distributions/*.zip
 
       - name: Attest build provenance
