@@ -1,51 +1,93 @@
 name: CodeQL Analysis
-
-on:
+'on':
   push:
-    branches: [ '*' ]
-    tags-ignore: [ '*' ]
+    branches:
+    - '*'
+    tags-ignore:
+    - '*'
   pull_request:
-    branches: [ '*' ]
+    branches:
+    - '*'
   schedule:
-    - cron: '0 0 * * 1'
-
+  - cron: 0 0 * * 1
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   analyze:
     name: Analyze (java-kotlin)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      security-events: write
-      actions: read
       contents: read
+      actions: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-      - name: Setup Java
-        uses: actions/setup-java@v6.0.1
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4.38.3
-        with:
-          languages: java-kotlin
-          build-mode: manual
-          config-file: .github/codeql/codeql-config.yml
-      - name: Build
-        env:
-          CI: true
-        # The CodeQL Kotlin extractor runs inside the Kotlin daemon and needs far more heap than a
-        # normal compile (it exhausts the default heap with the IntelliJ classpath).
-        run: |
-          ./gradlew :assemble -Pkotlin.daemon.jvmargs=-Xmx8g
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.38.3
-        with:
-          category: /language:java-kotlin
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        ref: ${{ github.sha }}
+    - name: Setup Java
+      uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+      with:
+        java-version: '21'
+        distribution: temurin
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d
+      with:
+        languages: java-kotlin
+        build-mode: manual
+        config-file: .github/codeql/codeql-config.yml
+    - name: Build
+      env:
+        CI: 'true'
+      run: |
+        ./gradlew :assemble -Pkotlin.daemon.jvmargs=-Xmx8g
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d
+      with:
+        category: /language:java-kotlin
+        upload: never
+        upload-database: false
+        output: ${{ runner.temp }}/codeql-sarif
+    - name: Keep analysis results as data only
+      id: sarif
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: codeql-sarif-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/codeql-sarif/*.sarif
+        if-no-files-found: error
+        retention-days: 7
+    outputs:
+      sarif-artifact-id: ${{ steps.sarif.outputs.artifact-id }}
+  upload-trusted:
+    name: Upload trusted CodeQL results
+    needs: analyze
+    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      && github.actor == 'mikejhill' && github.triggering_actor == 'mikejhill'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+    - name: Download exact same-run SARIF artifact
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+      with:
+        artifact-ids: ${{ needs.analyze.outputs.sarif-artifact-id }}
+        path: ${{ runner.temp }}/codeql-sarif
+    - name: Upload data without checkout or project execution
+      uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d
+      with:
+        sarif_file: ${{ runner.temp }}/codeql-sarif
+        category: /language:java-kotlin
+        ref: ${{ github.ref }}
+        sha: ${{ github.sha }}
+        checkout_path: ${{ github.workspace }}
+        wait-for-processing: true
+permissions:
+  contents: read
+  actions: read
