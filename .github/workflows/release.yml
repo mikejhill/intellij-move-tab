@@ -20,13 +20,15 @@ concurrency:
   group: release
   cancel-in-progress: false
 
-# master is protected (pull request + ci-pass required), so this workflow never pushes to it directly.
+# default branch is protected (pull request + ci-pass required), so this workflow never pushes to it directly.
 # It pushes only the release tag, then opens a release/vX.Y.Z pull request that syncs the promoted
-# CHANGELOG back to master. A maintainer merges that PR (bot-opened PRs need their CI run approved).
+# CHANGELOG back to default branch. A maintainer merges that PR (bot-opened PRs need their CI run approved).
 jobs:
   release:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     name: Release
+    env:
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -52,7 +54,7 @@ jobs:
           allow-initial-development-versions: true
           force-bump-patch-version: ${{ inputs.force-patch }}
           dry: true
-          # Release tags are not on master's first-parent history (the changelog commit reaches master
+          # Release tags are not on default branch's first-parent history (the changelog commit reaches default branch
           # via a rebase-merged PR), so count commits with the compare API instead of walking history.
           custom-arguments: --provider-opt github_use_compare_commits=true
 
@@ -94,7 +96,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          pending=$(gh pr list --base master --state open --json headRefName,url \
+          pending=$(gh pr list --base "$DEFAULT_BRANCH" --state open --json headRefName,url \
             --jq '[.[] | select(.headRefName | startswith("release/v")) | .url] | join(" ")')
           if [ -n "$pending" ]; then
             echo "::error::Merge the pending changelog-sync PR(s) first: $pending"
@@ -184,44 +186,44 @@ jobs:
         with:
           subject-path: build/distributions/*.zip
 
-      - name: Sync CHANGELOG to master
+      - name: Sync CHANGELOG to default branch
         if: inputs.dry-run != true
         env:
           VERSION: ${{ steps.version.outputs.value }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          git fetch -q origin master
-          if git show origin/master:CHANGELOG.md | grep -q "^## \[$VERSION\]"; then
-            echo "master already contains the [$VERSION] changelog section."
+          git fetch -q origin "$DEFAULT_BRANCH"
+          if git show "origin/$DEFAULT_BRANCH:CHANGELOG.md" | grep -q "^## \[$VERSION\]"; then
+            echo "default branch already contains the [$VERSION] changelog section."
             exit 0
           fi
-          # Re-apply the promotion on top of current master (rather than pushing the tagged commit) so
-          # the branch carries master's latest workflows and any [Unreleased] entries added since.
+          # Re-apply the promotion on top of current default branch (rather than pushing the tagged commit) so
+          # the branch carries default branch's latest workflows and any [Unreleased] entries added since.
           branch="release/v$VERSION"
           date=$(git show "v$VERSION:CHANGELOG.md" | grep -oP "^## \[$VERSION\] - \K[0-9-]+")
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -q -B "$branch" origin/master
+          git checkout -q -B "$branch" "origin/$DEFAULT_BRANCH"
           sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [$VERSION] - $date/" CHANGELOG.md
           grep -q "^## \[$VERSION\] - $date" CHANGELOG.md || {
-            echo "::error::Could not promote CHANGELOG on master for $VERSION"
+            echo "::error::Could not promote CHANGELOG on default branch for $VERSION"
             exit 1
           }
           git commit -q -am "chore(release): v$VERSION"
           git push --force origin "$branch"
-          pr_url=$(gh pr list --head "$branch" --base master --state open --json url --jq '.[0].url')
+          pr_url=$(gh pr list --head "$branch" --base "$DEFAULT_BRANCH" --state open --json url --jq '.[0].url')
           if [ -z "$pr_url" ]; then
-            pr_url=$(gh pr create --base master --head "$branch" \
+            pr_url=$(gh pr create --base "$DEFAULT_BRANCH" --head "$branch" \
               --title "chore(release): v$VERSION" \
-              --body "Syncs the CHANGELOG promotion for v$VERSION back to master. Opened by the release workflow; approve its workflow run (or close and reopen this PR) and merge it before the next release.")
+              --body "Syncs the CHANGELOG promotion for v$VERSION back to default branch. Opened by the release workflow; approve its workflow run (or close and reopen this PR) and merge it before the next release.")
           fi
           {
             echo "### Action required: merge $pr_url"
             echo ""
             echo "Bot-opened PRs need a maintainer to approve their CI run (or close and reopen the PR) before \`ci-pass\` can satisfy branch protection."
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::Merge $pr_url to sync the v$VERSION CHANGELOG to master"
+          echo "::notice::Merge $pr_url to sync the v$VERSION CHANGELOG to default branch"
 
   publish:
     needs: release
