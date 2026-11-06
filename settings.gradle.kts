@@ -40,15 +40,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.3"))
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
         constraints {
-            classpath("org.jsoup:jsoup:1.23.2")
+            classpath("org.jsoup:jsoup:1.24.1")
         }
     }
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.6.0"
+    id("com.gradle.develocity") version "4.6.1"
     id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("org.jetbrains.intellij.platform.settings") version "2.19.0"
